@@ -332,8 +332,10 @@ h3 {
   border-radius: var(--sl-radius-pill);
   background: rgba(94, 200, 192, 0.12);
   border: 2px solid var(--sl-accent-ink);
+  /* Standard property only. Lightning CSS adds the -webkit- prefix for Safari
+     at build time; hand-writing both makes the minifier collapse them to the
+     -webkit- form alone, which Firefox does not support (blur dies in prod). */
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 .sl-nav-brand {
   font-family: var(--sl-font-display);

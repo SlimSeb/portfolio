@@ -16,6 +16,14 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      // Lightning CSS is prefix-aware: it adds -webkit-backdrop-filter for
+      // Safari while keeping the standard form for Firefox/Chrome. esbuild (the
+      // default) drops the standard property, breaking backdrop blur in Firefox.
+      cssMinify: "lightningcss",
+      // Targets must include a Safari that still needs the -webkit- prefix.
+      cssTarget: ["chrome90", "firefox103", "safari15", "edge90"],
+    },
   },
 
   markdown: {
