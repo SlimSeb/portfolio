@@ -1,0 +1,433 @@
+/* ============================================================
+   slim.tf: global styles
+   Tailwind v4 + design tokens (@theme) + components + prose.
+   Imported once in BaseLayout.astro.
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* ------------------------------------------------------------
+   1. Design tokens as Tailwind v4 theme variables.
+   Names under @theme generate utilities automatically, e.g.
+   --color-sl-base       -> bg-sl-base / text-sl-base
+   --color-sl-accent     -> bg-sl-accent / border-sl-accent
+   --font-display        -> font-display
+   --radius-sl-lg        -> rounded-sl-lg
+   --shadow-sl-md        -> shadow-sl-md
+   ------------------------------------------------------------ */
+@theme {
+  /* Surfaces */
+  --color-sl-base: #f7fafa;
+  --color-sl-surface: #ffffff;
+  --color-sl-surface-2: #edf4f4;
+
+  /* Accent (light teal) */
+  --color-sl-accent: #5ec8c0;
+  --color-sl-accent-hover: #45b3ab;
+  --color-sl-accent-soft: #dbf1ef;
+  --color-sl-accent-ink: #1f706a;
+
+  /* Header band */
+  --color-sl-header-base: #cdebe7;
+  --color-sl-header-deep: #b6e0da;
+  --color-sl-header-text: #123f3b;
+  --color-sl-header-muted: #3f6f6a;
+
+  /* Text */
+  --color-sl-text: #1a2b2a;
+  --color-sl-text-secondary: #566766;
+  --color-sl-text-muted: #8a9897;
+
+  /* Borders */
+  --color-sl-border: #e2e8e8;
+  --color-sl-border-accent: #9ddcd6;
+
+  /* Feedback */
+  --color-sl-success: #3aa76d;
+  --color-sl-warning: #d9942b;
+  --color-sl-error: #d9534f;
+
+  /* Fonts */
+  --font-display: "Sora", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Radii */
+  --radius-sl-sm: 8px;
+  --radius-sl-md: 14px;
+  --radius-sl-lg: 20px;
+  --radius-sl-pill: 999px;
+
+  /* Shadows */
+  --shadow-sl-sm: 0 1px 2px rgba(26, 43, 42, 0.06);
+  --shadow-sl-md: 0 4px 16px rgba(26, 43, 42, 0.08);
+  --shadow-sl-lg: 0 12px 32px rgba(26, 43, 42, 0.1);
+
+  /* Easing */
+  --ease-sl: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ------------------------------------------------------------
+   2. Plain CSS custom properties.
+   These mirror the theme tokens for use inside component CSS
+   and the canvas script, plus values not exposed as utilities
+   (gradients, type scale, spacing, nav height).
+   ------------------------------------------------------------ */
+:root {
+  --sl-bg-base: #f7fafa;
+  --sl-bg-surface: #ffffff;
+  --sl-bg-surface-2: #edf4f4;
+
+  --sl-border: #e2e8e8;
+  --sl-border-accent: #9ddcd6;
+
+  --sl-accent: #5ec8c0;
+  --sl-accent-hover: #45b3ab;
+  --sl-accent-soft: #dbf1ef;
+  --sl-accent-ink: #1f706a;
+
+  --sl-gradient-accent: linear-gradient(135deg, #6fd3cb 0%, #3fa9a1 100%);
+  --sl-gradient-soft: linear-gradient(180deg, #ffffff 0%, #edf4f4 100%);
+  --sl-gradient-text: linear-gradient(135deg, #3fa9a1 0%, #2c8a83 100%);
+
+  --sl-header-text: #123f3b;
+  --sl-header-muted: #3f6f6a;
+  --sl-gradient-header: linear-gradient(180deg, #d6f0ec 0%, #bce3dd 100%);
+
+  --sl-text-primary: #1a2b2a;
+  --sl-text-secondary: #566766;
+  --sl-text-muted: #8a9897;
+
+  --sl-font-display: "Sora", "Inter", system-ui, sans-serif;
+  --sl-font-body: "Inter", system-ui, -apple-system, sans-serif;
+
+  --sl-text-hero: clamp(2.5rem, 6vw, 4.5rem);
+  --sl-text-h2: clamp(1.75rem, 4vw, 2.75rem);
+  --sl-text-h3: 1.5rem;
+  --sl-text-lg: 1.125rem;
+  --sl-text-base: 1rem;
+  --sl-text-sm: 0.875rem;
+
+  --sl-weight-black: 800;
+  --sl-weight-bold: 700;
+  --sl-weight-med: 500;
+
+  --sl-leading-tight: 1.1;
+  --sl-leading-body: 1.6;
+
+  --sl-space-2: 8px;
+  --sl-space-3: 12px;
+  --sl-space-4: 16px;
+  --sl-space-6: 24px;
+  --sl-space-8: 32px;
+  --sl-space-12: 48px;
+  --sl-space-16: 64px;
+  --sl-space-24: 96px;
+
+  --sl-radius-sm: 8px;
+  --sl-radius-md: 14px;
+  --sl-radius-lg: 20px;
+  --sl-radius-pill: 999px;
+
+  --sl-shadow-sm: 0 1px 2px rgba(26, 43, 42, 0.06);
+  --sl-shadow-md: 0 4px 16px rgba(26, 43, 42, 0.08);
+  --sl-shadow-lg: 0 12px 32px rgba(26, 43, 42, 0.1);
+
+  --sl-container-max: 1200px;
+  --sl-nav-height: 88px;
+
+  --sl-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --sl-dur: 0.15s;
+}
+
+/* ------------------------------------------------------------
+   3. Base element defaults
+   ------------------------------------------------------------ */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--sl-nav-height);
+}
+body {
+  margin: 0;
+  background: var(--sl-bg-base);
+  color: var(--sl-text-primary);
+  font-family: var(--sl-font-body);
+  font-size: var(--sl-text-base);
+  line-height: var(--sl-leading-body);
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--sl-font-display);
+  line-height: var(--sl-leading-tight);
+  margin: 0;
+  color: var(--sl-text-primary);
+}
+:focus-visible {
+  outline: 2px solid var(--sl-accent);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------
+   4. Layout helpers
+   ------------------------------------------------------------ */
+.sl-container {
+  max-width: var(--sl-container-max);
+  margin-inline: auto;
+  padding-inline: var(--sl-space-6);
+}
+.sl-section {
+  padding-block: var(--sl-space-24);
+  position: relative;
+}
+.sl-eyebrow {
+  color: var(--sl-accent-hover);
+  font-size: var(--sl-text-sm);
+  font-weight: var(--sl-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sl-section h2 {
+  font-size: var(--sl-text-h2);
+  font-weight: var(--sl-weight-black);
+  margin: var(--sl-space-3) 0 var(--sl-space-8);
+}
+.sl-section-tint {
+  background: var(--sl-gradient-soft);
+  border-block: 1px solid var(--sl-border);
+}
+
+/* ------------------------------------------------------------
+   5. Text accent (subtle single-hue teal gradient)
+   ------------------------------------------------------------ */
+.sl-accent-text {
+  background: var(--sl-gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ------------------------------------------------------------
+   6. Buttons
+   ------------------------------------------------------------ */
+.sl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sl-space-2);
+  font-family: var(--sl-font-body);
+  font-weight: var(--sl-weight-bold);
+  font-size: var(--sl-text-base);
+  padding: 14px 28px;
+  border-radius: var(--sl-radius-pill);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform var(--sl-dur) var(--sl-ease),
+    box-shadow var(--sl-dur) var(--sl-ease),
+    background var(--sl-dur) var(--sl-ease),
+    border-color var(--sl-dur) var(--sl-ease);
+}
+.sl-btn-primary {
+  background: var(--sl-gradient-accent);
+  color: #06302d;
+  box-shadow: var(--sl-shadow-sm);
+}
+.sl-btn-primary:hover {
+  background: var(--sl-accent-hover);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: var(--sl-shadow-md);
+}
+.sl-btn-secondary {
+  background: var(--sl-bg-surface);
+  color: var(--sl-text-primary);
+  border: 1px solid var(--sl-border);
+}
+.sl-btn-secondary:hover {
+  border-color: var(--sl-border-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--sl-shadow-sm);
+}
+
+/* ------------------------------------------------------------
+   7. Card
+   ------------------------------------------------------------ */
+.sl-card {
+  background: var(--sl-bg-surface);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-lg);
+  padding: var(--sl-space-8);
+  box-shadow: var(--sl-shadow-sm);
+  transition:
+    border-color var(--sl-dur) var(--sl-ease),
+    box-shadow var(--sl-dur) var(--sl-ease),
+    transform var(--sl-dur) var(--sl-ease);
+}
+.sl-card:hover {
+  border-color: var(--sl-border-accent);
+  box-shadow: var(--sl-shadow-md);
+  transform: translateY(-2px);
+}
+
+/* ------------------------------------------------------------
+   8. Badge
+   ------------------------------------------------------------ */
+.sl-badge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: var(--sl-radius-pill);
+  background: var(--sl-accent-soft);
+  color: var(--sl-accent-ink);
+  border: 1px solid var(--sl-border-accent);
+  font-size: var(--sl-text-sm);
+  font-weight: var(--sl-weight-med);
+}
+
+/* ------------------------------------------------------------
+   9. Stat
+   ------------------------------------------------------------ */
+.sl-stat-number {
+  font-family: var(--sl-font-display);
+  font-weight: var(--sl-weight-black);
+  font-size: var(--sl-text-hero);
+  line-height: 1;
+  background: var(--sl-gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.sl-stat-label {
+  color: var(--sl-text-secondary);
+  font-size: var(--sl-text-sm);
+}
+
+/* ------------------------------------------------------------
+   10. Sticky pill navbar
+   ------------------------------------------------------------ */
+.sl-nav-wrap {
+  position: sticky;
+  top: var(--sl-space-4);
+  z-index: 50;
+  height: var(--sl-nav-height);
+  padding-inline: var(--sl-space-4);
+  padding-top: var(--sl-space-4);
+}
+.sl-nav {
+  position: relative;
+  max-width: var(--sl-container-max);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sl-space-4);
+  padding: 10px 12px 10px 22px;
+  border-radius: var(--sl-radius-pill);
+  background: rgba(94, 200, 192, 0.12);
+  border: 2px solid var(--sl-accent-ink);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.sl-nav-brand {
+  font-family: var(--sl-font-display);
+  font-weight: var(--sl-weight-black);
+  font-size: var(--sl-text-lg);
+  color: var(--sl-text-primary);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.sl-nav-links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-6);
+}
+.sl-nav-links a {
+  color: var(--sl-text-secondary);
+  text-decoration: none;
+  font-size: var(--sl-text-sm);
+  font-weight: var(--sl-weight-med);
+  transition: color var(--sl-dur) var(--sl-ease);
+}
+.sl-nav-links a:hover {
+  color: var(--sl-accent-ink);
+}
+.sl-nav .sl-btn {
+  padding: 9px 20px;
+  font-size: var(--sl-text-sm);
+}
+@media (max-width: 640px) {
+  .sl-nav-links {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------
+   11. Header band (hero wrapper)
+   ------------------------------------------------------------ */
+.sl-band {
+  background: var(--sl-gradient-header);
+  padding-top: var(--sl-space-4);
+  padding-bottom: var(--sl-space-12);
+  margin-top: calc(-1 * var(--sl-nav-height));
+}
+
+/* ------------------------------------------------------------
+   12. Hero
+   ------------------------------------------------------------ */
+.sl-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.sl-hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sl-hero-inner {
+  position: relative;
+  z-index: 2;
+  padding: var(--sl-space-8);
+}
+.sl-hero h1 {
+  font-size: var(--sl-text-hero);
+  font-weight: var(--sl-weight-black);
+  margin: var(--sl-space-4) 0;
+  color: var(--sl-header-text);
+}
+.sl-hero p {
+  color: var(--sl-header-muted);
+  font-size: var(--sl-text-lg);
+  max-width: 540px;
+  margin: 0 auto var(--sl-space-8);
+}
+.sl-hero-cta {
+  display: flex;
+  gap: var(--sl-space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------
+   13. Reduced motion
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,166 @@
+/* ============================================================
+   slim.tf: .sl-prose
+   Styles raw MDX/markdown body content (headings, paragraphs,
+   lists, code, quotes, tables) to match the design system.
+   Wrap rendered post content in <div class="sl-prose">.
+   ============================================================ */
+
+.sl-prose {
+  color: var(--sl-text-primary);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  max-width: 70ch;
+}
+
+/* Headings */
+.sl-prose h1,
+.sl-prose h2,
+.sl-prose h3,
+.sl-prose h4 {
+  font-family: var(--sl-font-display);
+  color: var(--sl-text-primary);
+  line-height: 1.2;
+  scroll-margin-top: var(--sl-nav-height);
+}
+.sl-prose h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin: 0 0 0.75em;
+}
+.sl-prose h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 2em 0 0.6em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--sl-border);
+}
+.sl-prose h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 1.6em 0 0.5em;
+}
+.sl-prose h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1.4em 0 0.4em;
+}
+
+/* Body */
+.sl-prose p {
+  margin: 0 0 1.15em;
+}
+.sl-prose a {
+  color: var(--sl-accent-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--sl-border-accent);
+  text-underline-offset: 2px;
+  transition: text-decoration-color var(--sl-dur) var(--sl-ease);
+}
+.sl-prose a:hover {
+  text-decoration-color: var(--sl-accent);
+}
+.sl-prose strong {
+  font-weight: 700;
+  color: var(--sl-text-primary);
+}
+
+/* Lists */
+.sl-prose ul,
+.sl-prose ol {
+  margin: 0 0 1.15em;
+  padding-left: 1.4em;
+}
+.sl-prose li {
+  margin: 0.3em 0;
+}
+.sl-prose ul li::marker {
+  color: var(--sl-accent);
+}
+.sl-prose ol li::marker {
+  color: var(--sl-accent-ink);
+  font-weight: 700;
+}
+
+/* Inline code */
+.sl-prose :not(pre) > code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.875em;
+  background: var(--sl-accent-soft);
+  color: var(--sl-accent-ink);
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  border: 1px solid var(--sl-border-accent);
+}
+
+/* Code blocks (Shiki output) */
+.sl-prose pre {
+  background: var(--sl-bg-surface);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-md);
+  padding: 1.1em 1.25em;
+  overflow-x: auto;
+  margin: 0 0 1.4em;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  box-shadow: var(--sl-shadow-sm);
+}
+.sl-prose pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+
+/* Blockquote */
+.sl-prose blockquote {
+  margin: 1.4em 0;
+  padding: 0.6em 1.2em;
+  border-left: 4px solid var(--sl-accent);
+  background: var(--sl-bg-surface-2);
+  border-radius: 0 var(--sl-radius-sm) var(--sl-radius-sm) 0;
+  color: var(--sl-text-secondary);
+  font-style: italic;
+}
+.sl-prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Media */
+.sl-prose img,
+.sl-prose video {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--sl-radius-md);
+  border: 1px solid var(--sl-border);
+  margin: 1.4em 0;
+}
+
+/* Rules */
+.sl-prose hr {
+  border: 0;
+  border-top: 1px solid var(--sl-border);
+  margin: 2.4em 0;
+}
+
+/* Tables */
+.sl-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.4em 0;
+  font-size: 0.95rem;
+}
+.sl-prose th,
+.sl-prose td {
+  text-align: left;
+  padding: 0.6em 0.9em;
+  border: 1px solid var(--sl-border);
+}
+.sl-prose th {
+  background: var(--sl-bg-surface-2);
+  font-weight: 700;
+}
+
+/* Footnotes / small */
+.sl-prose small {
+  color: var(--sl-text-muted);
+}

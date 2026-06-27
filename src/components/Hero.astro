@@ -1,0 +1,93 @@
+---
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  accent?: string;
+  subtitle?: string;
+}
+const {
+  eyebrow = "Designer & developer",
+  title = "I build things",
+  accent = "on the web",
+  subtitle = "Portfolio and notes on design systems, front-end engineering, and the occasional side quest.",
+} = Astro.props;
+---
+
+<div class="sl-hero">
+  <canvas class="sl-hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="sl-hero-inner">
+    <span class="sl-badge">{eyebrow}</span>
+    <h1>{title}<br /><span class="sl-accent-text">{accent}</span></h1>
+    <p>{subtitle}</p>
+    <div class="sl-hero-cta">
+      <a class="sl-btn sl-btn-primary" href="/#work">View work</a>
+      <a class="sl-btn sl-btn-secondary" href="/blog">Read the blog</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById("heroCanvas") as HTMLCanvasElement | null;
+  if (canvas) {
+    const ctx = canvas.getContext("2d")!;
+    const host = canvas.parentElement as HTMLElement;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let t = 0;
+
+    const resize = () => {
+      const w = host.clientWidth,
+        h = host.clientHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const frame = () => {
+      const w = host.clientWidth,
+        h = host.clientHeight;
+      const horizon = h * 0.42,
+        cx = w / 2;
+      ctx.clearRect(0, 0, w, h);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, "#D6F0EC");
+      bg.addColorStop(1, "#BCE3DD");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.lineWidth = 1;
+      const n = 16;
+      for (let i = -n; i <= n; i++) {
+        const fx = i / n;
+        ctx.beginPath();
+        ctx.moveTo(cx + fx * 40, horizon);
+        ctx.lineTo(cx + fx * w * 1.6, h);
+        ctx.strokeStyle = `rgba(63,169,161,${0.12 + 0.3 * (1 - Math.abs(fx))})`;
+        ctx.stroke();
+      }
+
+      const move = reduce ? 0 : (t * 0.0009) % 1;
+      for (let r = 0; r < 22; r++) {
+        const p = (r / 22 + move) % 1,
+          ease = p * p;
+        const y = horizon + ease * (h - horizon);
+        const spread = 40 + ease * (w * 1.6 - 40);
+        ctx.beginPath();
+        ctx.moveTo(cx - spread, y);
+        ctx.lineTo(cx + spread, y);
+        ctx.strokeStyle = `rgba(63,169,161,${0.08 + 0.34 * ease})`;
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "rgba(44,138,131,0.45)";
+      ctx.fillRect(0, horizon - 0.5, w, 1);
+
+      t += 16;
+      if (!reduce) requestAnimationFrame(frame);
+    };
+    frame();
+  }
+</script>

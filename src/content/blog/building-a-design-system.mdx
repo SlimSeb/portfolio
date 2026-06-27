@@ -1,0 +1,46 @@
+---
+title: "Building a design system in teal"
+description: "How this site's tokens, components, and prose styles fit together, and why I went with a single accent color."
+pubDate: 2025-06-20
+tags: ["design systems", "css"]
+---
+
+import Card from "../../components/Card.astro";
+
+This is a sample post. It's written in **MDX**, so it's regular Markdown with
+the option to drop in components when plain prose isn't enough.
+
+## Why one accent color
+
+Constraining the palette to a single teal accent (plus tints and a dark "ink"
+shade for text) keeps everything cohesive. The accent shows up in links, the
+primary button gradient, list markers, and the hero grid, and nowhere else
+fights it for attention.
+
+Here's an inline bit of `code`, and a block:
+
+```ts
+type Token = `--sl-${string}`;
+
+const accent: Token = "--sl-accent"; // #5EC8C0
+```
+
+## Dropping in a component
+
+Because this is MDX, I can render a real component right inside the post:
+
+<Card title="A component, mid-article">
+  This card is the same one used on the home page, imported and rendered inline.
+</Card>
+
+> Blockquotes get the teal left-border treatment, so callouts read as part of
+> the system rather than browser defaults.
+
+### Lists work too
+
+- First item, with a teal marker
+- Second item
+- Third item
+
+That's the whole loop: tokens define the look, components reuse it, and
+`.sl-prose` makes sure long-form writing inherits all of it.

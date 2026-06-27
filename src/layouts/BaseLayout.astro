@@ -1,0 +1,60 @@
+---
+import "../styles/global.css";
+import Nav from "../components/Nav.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Set false on the home page where the hero band sits behind the nav. */
+  padForNav?: boolean;
+}
+const {
+  title,
+  description = "Portfolio and blog of slim.tf: design systems and front-end engineering.",
+  padForNav = true,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700;800&family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <Nav />
+    {
+      padForNav ? (
+        <main style="padding-top:var(--sl-nav-height)">
+          <slot />
+        </main>
+      ) : (
+        <main>
+          <slot />
+        </main>
+      )
+    }
+
+    <footer class="sl-container" style="padding-block:var(--sl-space-12);border-top:1px solid var(--sl-border);margin-top:var(--sl-space-16);color:var(--sl-text-muted);font-size:var(--sl-text-sm);display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--sl-space-4)">
+      <span>© {new Date().getFullYear()} slim.tf</span>
+      <span style="display:flex;gap:var(--sl-space-6)">
+        <a href="/rss.xml" style="color:var(--sl-accent-ink)">RSS</a>
+        <a href="https://github.com" style="color:var(--sl-accent-ink)">GitHub</a>
+      </span>
+    </footer>
+  </body>
+</html>

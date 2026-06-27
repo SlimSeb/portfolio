@@ -1,0 +1,71 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/Hero.astro";
+import Card from "../components/Card.astro";
+import PostCard from "../components/PostCard.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+---
+
+<BaseLayout title="slim.tf: portfolio & blog" padForNav={false}>
+  <header class="sl-band" id="top">
+    <Hero />
+  </header>
+
+  <!-- Work -->
+  <section class="sl-container sl-section" id="work">
+    <span class="sl-eyebrow">Selected work</span>
+    <h2>Things I've built</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--sl-space-6)">
+      <Card title="Design system" icon="◆">
+        A teal, token-driven component library powering this very site.
+      </Card>
+      <Card title="Side project" icon="✦">
+        Short description of a project worth showing off. Swap in your own.
+      </Card>
+      <Card title="Open source" icon="❖">
+        A library or tool you maintain, with a link out to the repo.
+      </Card>
+    </div>
+  </section>
+
+  <!-- Latest writing -->
+  <section class="sl-section-tint">
+    <div class="sl-container sl-section">
+      <span class="sl-eyebrow">From the blog</span>
+      <h2>Latest writing</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--sl-space-6)">
+        {
+          posts.map((post) => (
+            <PostCard
+              href={`/blog/${post.id}/`}
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              tags={post.data.tags}
+            />
+          ))
+        }
+      </div>
+      <div style="margin-top:var(--sl-space-8)">
+        <a class="sl-btn sl-btn-secondary" href="/blog">All posts</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="sl-container sl-section" id="about">
+    <span class="sl-eyebrow">About</span>
+    <h2>A little about me</h2>
+    <p style="max-width:60ch;color:var(--sl-text-secondary);font-size:var(--sl-text-lg)">
+      Replace this with your bio: what you do, what you care about, and what
+      you're looking for. Keep it short and human.
+    </p>
+    <div style="margin-top:var(--sl-space-6)" id="contact">
+      <a class="sl-btn sl-btn-primary" href="mailto:you@example.com">Get in touch</a>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,17 @@
+---
+interface Props {
+  title: string;
+  icon?: string;
+}
+const { title, icon } = Astro.props;
+---
+
+<article class="sl-card">
+  {icon && <div style="font-size:28px;margin-bottom:var(--sl-space-3)">{icon}</div>}
+  <h3 style="font-size:var(--sl-text-h3);font-weight:var(--sl-weight-bold);margin-bottom:var(--sl-space-2)">
+    {title}
+  </h3>
+  <p style="color:var(--sl-text-secondary);margin:0">
+    <slot />
+  </p>
+</article>

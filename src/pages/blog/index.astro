@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout title="Blog | slim.tf" description="Notes on design systems and front-end engineering.">
+  <section class="sl-container sl-section">
+    <span class="sl-eyebrow">Blog</span>
+    <h2>Writing &amp; notes</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--sl-space-6);margin-top:var(--sl-space-4)">
+      {
+        posts.map((post) => (
+          <PostCard
+            href={`/blog/${post.id}/`}
+            title={post.data.title}
+            description={post.data.description}
+            pubDate={post.data.pubDate}
+            tags={post.data.tags}
+          />
+        ))
+      }
+    </div>
+    {posts.length === 0 && <p style="color:var(--sl-text-secondary)">No posts yet, check back soon.</p>}
+  </section>
+</BaseLayout>

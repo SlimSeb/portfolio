@@ -1,0 +1,17 @@
+---
+const links = [
+  { href: "/#work", label: "Work" },
+  { href: "/blog", label: "Blog" },
+  { href: "/#about", label: "About" },
+];
+---
+
+<div class="sl-nav-wrap">
+  <nav class="sl-nav" aria-label="Primary">
+    <a class="sl-nav-brand" href="/">slim.tf</a>
+    <div class="sl-nav-links">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </div>
+    <a class="sl-btn sl-btn-primary" href="/#contact">Get in touch</a>
+  </nav>
+</div>
