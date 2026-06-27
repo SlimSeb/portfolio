@@ -23,11 +23,13 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
       <Card title="Design system" icon="◆">
         A teal, token-driven component library powering this very site.
       </Card>
-      <Card title="Side project" icon="✦">
-        Short description of a project worth showing off. Swap in your own.
+      <Card title="Simplex" icon="✦">
+        A side project of mine, live at
+        <a class="sl-accent-text" href="https://simplex.slim.tf">simplex.slim.tf</a>.
       </Card>
       <Card title="Open source" icon="❖">
-        A library or tool you maintain, with a link out to the repo.
+        A handful of NuGet packages I maintain, over on
+        <a class="sl-accent-text" href="https://www.nuget.org/profiles/Slimf">my NuGet profile</a>.
       </Card>
     </div>
   </section>
