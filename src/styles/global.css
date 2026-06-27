@@ -139,6 +139,7 @@
 
   --sl-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --sl-dur: 0.15s;
+  --sl-dur-reveal: 1.2s;
 }
 
 /* ------------------------------------------------------------
@@ -424,7 +425,23 @@ h3 {
 }
 
 /* ------------------------------------------------------------
-   13. Reduced motion
+   13. Scroll reveal
+   ------------------------------------------------------------ */
+.sl-js .sl-reveal {
+  opacity: 0;
+  transform: translateY(64px) scale(0.97);
+  transition:
+    opacity var(--sl-dur-reveal) var(--sl-ease),
+    transform var(--sl-dur-reveal) var(--sl-ease);
+  will-change: opacity, transform;
+}
+.sl-js .sl-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ------------------------------------------------------------
+   14. Reduced motion
    ------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -434,5 +451,9 @@ h3 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  .sl-js .sl-reveal {
+    opacity: 1;
+    transform: none;
   }
 }

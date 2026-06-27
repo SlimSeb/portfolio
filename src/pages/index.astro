@@ -16,7 +16,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
   </header>
 
   <!-- Work -->
-  <section class="sl-container sl-section" id="work">
+  <section class="sl-container sl-section sl-reveal" id="work">
     <span class="sl-eyebrow">Selected work</span>
     <h2>Things I've built</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--sl-space-6)">
@@ -33,7 +33,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
   </section>
 
   <!-- Latest writing -->
-  <section class="sl-section-tint">
+  <section class="sl-section-tint sl-reveal">
     <div class="sl-container sl-section">
       <span class="sl-eyebrow">From the blog</span>
       <h2>Latest writing</h2>
@@ -57,7 +57,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
   </section>
 
   <!-- About -->
-  <section class="sl-container sl-section" id="about">
+  <section class="sl-container sl-section sl-reveal" id="about">
     <span class="sl-eyebrow">About</span>
     <h2>A little about me</h2>
     <p style="max-width:60ch;color:var(--sl-text-secondary);font-size:var(--sl-text-lg)">
@@ -69,3 +69,22 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  // Flag JS so the reveal's hidden state only applies when we can reveal it.
+  document.documentElement.classList.add("sl-js");
+
+  const reveals = document.querySelectorAll<HTMLElement>(".sl-reveal");
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          obs.unobserve(entry.target);
+        }
+      }
+    },
+    { threshold: 0.075, rootMargin: "0px 0px -20% 0px" },
+  );
+  reveals.forEach((el) => observer.observe(el));
+</script>
