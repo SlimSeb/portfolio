@@ -24,11 +24,11 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
         A teal, token-driven component library powering this very site.
       </Card>
       <Card title="Simplex" icon="✦">
-        A side project of mine, live at
+        A side project of mine, live at{" "}
         <a class="sl-accent-text" href="https://simplex.slim.tf">simplex.slim.tf</a>.
       </Card>
       <Card title="Open source" icon="❖">
-        A handful of NuGet packages I maintain, over on
+        A handful of NuGet packages I maintain, over on{" "}
         <a class="sl-accent-text" href="https://www.nuget.org/profiles/Slimf">my NuGet profile</a>.
       </Card>
     </div>
@@ -95,6 +95,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
     </div>
     <div style="margin-top:var(--sl-space-6);display:flex;gap:var(--sl-space-3);flex-wrap:wrap" id="contact">
       <a class="sl-btn sl-btn-primary" href="mailto:slimane.fakani.dev@gmail.com">Get in touch</a>
+      <a class="sl-btn sl-btn-secondary" href="/cv">View my CV</a>
     </div>
   </section>
 </BaseLayout>
