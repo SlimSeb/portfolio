@@ -1,0 +1,236 @@
+---
+title: "Building an Interactive Simplex Solver"
+description: "Notes on building a two-phase Simplex solver in TypeScript with Astro, one React island, Tailwind v4 and Framer Motion, including how it handles i18n."
+pubDate: 2026-06-27
+tags: ["astro", "react", "linear-programming", "typescript", "i18n", "tailwind"]
+author: "Slimane Fakani"
+---
+
+# Building an Interactive Simplex Solver
+
+Most optimization tools give you an answer and keep the steps to themselves. You type in a problem, you get back a number, and the work in between, the pivots and the basis swaps, stays hidden.
+
+[**Simplex Solver**](https://simplex.slim.tf/) shows that work. You build a linear program in the browser, hit **Solve**, and then you can step through every pivot one iteration at a time, watching the entering column, the leaving row and the pivot element highlight as you go. I built it partly as a teaching aid and partly as an excuse to write a clean Simplex implementation in TypeScript.
+
+This post covers the problem it solves, the algorithm, the stack, how the code is laid out, and how it handles English and French.
+
+---
+
+## The problem: linear programming, briefly
+
+A **linear program** (LP) is an optimization problem where the objective and the constraints are all linear. You have:
+
+- An **objective** to maximize or minimize, like profit or cost: `Z = 3·x1 + 5·x2`.
+- A set of **constraints**: `x1 ≤ 4`, `2·x2 ≤ 12`, `3·x1 + 2·x2 ≤ 18`.
+- A rule that every decision variable is **non-negative**: `x1, x2 ≥ 0`.
+
+The constraints define a convex region, the *feasible region*, and a basic theorem of LP says the optimum, if it exists, sits at a **corner** of that region. So the problem reduces to visiting corners until none of the neighbors is better.
+
+This shows up in a lot of places: product mix, diet formulation, logistics, portfolio allocation, network flow. The preset that ships in the app, *Wyndor Glass*, is the textbook product-mix problem: how many batches of two products to make given three resource limits. The answer is `x1 = 2, x2 = 6, Z = 36`, but the point of the tool is showing *how* the algorithm gets there.
+
+---
+
+## The algorithm: two-phase primal Simplex
+
+The Simplex method, from George Dantzig in 1947, walks the corners. Starting from one vertex of the feasible region, it moves along an edge to an adjacent vertex that improves the objective, and stops when no improving edge is left.
+
+The algorithm lives in [`src/lib/simplex.ts`](src/lib/simplex.ts) as one pure function, `solveLP`, with **no UI dependencies**. That separation matters later. Here is the shape of it.
+
+### 1. Normalize and standardize
+
+First, every constraint is flipped so its right-hand side is non-negative (multiply by `-1` and reverse the relation when needed). Then `≤`, `≥` and `=` constraints are converted to equalities by adding helper columns:
+
+- A `≤` constraint gets a **slack** variable (`+s`): the unused headroom.
+- A `≥` constraint gets a **surplus** variable (`-s`) *and* an **artificial** variable.
+- An `=` constraint gets an **artificial** variable only.
+
+Slack columns give you a free starting basis: at the origin, all the slack is in use and the tableau is immediately valid. Artificial variables only exist to give `≥` and `=` rows a starting basic variable; they should not appear in a real solution.
+
+### 2. Phase 1: find any feasible corner
+
+This is the "two-phase" part. When artificials exist, the origin is not feasible, so before optimizing we need a valid starting vertex. Phase 1 finds one by setting the real objective aside and **minimizing the sum of the artificial variables**:
+
+```
+minimize  a1 + a2 + ...
+```
+
+If that sum can be driven to zero, the artificials are out of the basis and we have a real feasible corner. If the sum stays positive, no point satisfies all the constraints at once, so the problem is **infeasible**:
+
+```ts
+let artificialSum = 0;
+for (let i = 0; i < m; i++) {
+  if (columnKinds[basis[i]] === "artificial") artificialSum += b[i];
+}
+if (artificialSum > 1e-6) {
+  return { status: "infeasible", /* ... */ };
+}
+```
+
+Phase 1 only runs when it is needed. A problem with only `≤` constraints skips it.
+
+### 3. Phase 2: optimize
+
+With a feasible basis in hand, the solver switches back to the real objective and runs ordinary Simplex, with one rule: artificial columns cannot re-enter the basis (`allowedP2 = columnKinds.map((kind) => kind !== "artificial")`). Each iteration:
+
+- Computes **reduced costs** `cj − zj` for every allowed column.
+- Picks the entering variable by **Dantzig's rule** (largest positive reduced cost), breaking ties by index for determinism.
+- Runs the **minimum-ratio test** to decide which variable leaves, the first constraint to bind as the entering variable grows.
+- **Pivots** with Gauss-Jordan elimination so the entering column becomes a unit vector.
+
+If an entering column has no positive entries in the ratio test, it can grow without limit, so the objective is **unbounded** and the solver reports that instead of looping.
+
+> Internally the solver <strong>always maximizes</strong>. A minimization objective is negated on the way in and negated again on the way out (<code>toOriginal</code>). One code path handles both.
+
+### 4. The part that makes it interactive
+
+This is the design decision that makes it usable as a teaching tool. On every pivot, `solveLP` records a full `snapshot`: the tableau, the basis, the reduced-cost row, the entering and leaving variables, the pivot coordinates, and the objective value at that step. These collect into an `iterations` array on the result.
+
+The solver renders nothing. It just leaves behind a replayable record of its own steps, which is exactly why the algorithm can stay UI-free and the UI can stay math-free.
+
+There is also an iteration cap of `200 + 20 * (m + totalCols)`, so a pathological cycling case ends in "iteration limit reached" rather than a frozen tab. A `tidy` helper snaps near-integers back to integers, so the tableau shows `4` instead of `3.9999999998`.
+
+---
+
+## Why this stack
+
+The app is **Astro 7, one React 19 island, Tailwind v4, Framer Motion and strict TypeScript**.
+
+### Astro for everything static
+
+The site is mostly a document with one interactive widget in the middle, which is what Astro is good at. It renders static HTML by default and ships **no JavaScript** unless you ask for an island. The header, footer, SEO `<head>`, JSON-LD, language switcher and theme toggle are all static or small inline scripts.
+
+### One React island
+
+The solver needs client-side state: editable coefficient grids, playback controls, an animation timeline. So [`SimplexSolver.tsx`](src/components/SimplexSolver.tsx) is mounted as a single island with `client:load`:
+
+```astro
+<SimplexSolver client:load lang={lang} />
+```
+
+That `client:load` directive is the whole hydration boundary. One island, one bundle. The rest of the page stays HTML.
+
+### Vanilla where a framework would be overkill
+
+The theme toggle is a good example. It could have been a second React component, but that would mean a second hydration island for a button that flips one class. Instead it is a plain Astro component with a short inline script ([`ThemeToggle.astro`](src/components/ThemeToggle.astro)), which keeps the page to a single React island. An inline pre-paint script in the layout reads `localStorage` and sets `.dark` before first paint, so there is no flash of the wrong theme.
+
+### Framer Motion for the transitions
+
+The animation is the main point of the tool, so it gets a real library. Framer Motion drives the tableau-to-tableau transitions, the values fading in as they change, constraint rows entering and leaving with `AnimatePresence`, and the slider-driven step changes.
+
+### TypeScript, strict
+
+The domain has a lot of small, easy-to-confuse vocabulary: columns vs. variables, structural vs. slack vs. surplus vs. artificial, max vs. min, phase 1 vs. phase 2. Strict types help here. `ColumnKind`, `Relation`, `ObjectiveSense` and `SolveStatus` are string-literal unions, so the compiler catches a `"surplus"` used where a `Relation` belongs.
+
+## Styling: Tailwind v4, monochrome with two accents
+
+The visual style is plain: a black-and-white base with **two accent colors that carry meaning**. Green is "improving / entering"; orange is "leaving / pivot". That maps onto the algorithm's two moving parts at every iteration, so the color doubles as the explanation.
+
+Tailwind v4 is wired in through `@tailwindcss/vite`, with no PostCSS config and no `tailwind.config.js`. The theme lives in CSS in [`global.css`](src/styles/global.css):
+
+```css
+@import "tailwindcss";
+
+/* Class-based dark mode: toggled by adding `.dark` to <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+```
+
+A couple of details:
+
+- **Class-based dark mode** via a custom `dark` variant, paired with the pre-paint script in the layout, gives flash-free theme switching that persists across reloads.
+- **A monospace font for everything numeric.** JetBrains Mono with `tabular-nums` keeps tableau columns from jittering as digits change during playback.
+- The tableau gets a **thin monochrome scrollbar** so wide problems scroll horizontally without the default native bar.
+
+Shared class strings (`card`, `fieldBase`, `iconBtn`) are pulled out to constants at the top of the React island, which keeps the JSX readable without reaching for a component library.
+
+---
+
+## Two languages, one monolingual solver
+
+The site is in English and French, and the rule I followed is that the solver never knows about either one.
+
+Astro handles routing. The config declares the locales and tells Astro not to prefix the default:
+
+```js
+// astro.config.mjs
+i18n: {
+  locales: ["en", "fr"],
+  defaultLocale: "en",
+  routing: { prefixDefaultLocale: false },
+},
+```
+
+So English is at `/` and French at `/fr/`. Each page is a small file that passes its locale down:
+
+```astro
+<Layout lang="fr">
+  <SolverPage lang="fr" />
+</Layout>
+```
+
+That `lang` prop flows through the components and feeds `getMessages(lang)`, which returns a typed `Messages` dictionary. The shape of that dictionary is defined by one `interface` in [`i18n/types.ts`](src/i18n/types.ts), so the compiler checks that English and French have the same keys. A missing translation fails the build.
+
+The one part worth explaining is how iteration messages get rendered. The algorithm never builds a sentence. When something notable happens in an iteration, it emits a small structured object describing *what* happened:
+
+```ts
+// from simplex.ts, a discriminated union of events
+export type IterationNote =
+  | { kind: "optimal"; phase: 1 | 2 }
+  | { kind: "unbounded"; column: string }
+  | { kind: "pivot"; phase: 1 | 2; entering: string; leaving: string; row: number }
+  | { kind: "iteration-limit" };
+```
+
+Turning that into text happens in the UI. Each dictionary has a `note` function that matches on the union and returns a sentence in its own language:
+
+```ts
+// en.ts
+note: (note) => {
+  switch (note.kind) {
+    case "pivot":
+      return `Phase ${note.phase}: ${note.entering} enters, ${note.leaving} leaves (pivot on row ${note.row}).`;
+    case "unbounded":
+      return `Column ${note.column} can increase without bound, the problem is unbounded.`;
+    // ...
+  }
+}
+```
+
+```ts
+// fr.ts, same input, French output
+note: (note) => {
+  switch (note.kind) {
+    case "pivot":
+      return `Phase ${note.phase} : ${note.entering} entre, ${note.leaving} sort (pivot sur la ligne ${note.row}).`;
+    // ...
+  }
+}
+```
+
+Same structured event, two renderings. Adding a language means writing one new dictionary file; `simplex.ts` does not change. The rest of the dictionary follows the same pattern: interpolation and pluralization are plain functions, not string templates, so they are type-checked and hard to call wrong.
+
+The rest of the i18n surface falls out of the locale config, since it is the single source of truth: the `<html lang>`, `og:locale` and `hreflang` links in [`Layout.astro`](src/layouts/Layout.astro) come from a `localeMeta` table, `sitemap.xml.ts` emits cross-linked `hreflang` entries per page, and the language switcher is a static Astro component that maps over `locales` with no JavaScript.
+
+---
+
+## Deploying
+
+This was my first time using Cloudflare, and it was simpler than I expected. The whole site is static, so there is nothing to run on a server: `npm run build` produces a `dist/` folder of plain HTML, CSS and JS.
+
+I created a Pages project and uploaded the `dist/` folder directly. Cloudflare served it on a `*.pages.dev` subdomain straight away. To put it on `simplex.slim.tf`, I added a `CNAME` record pointing the subdomain at the Pages project, and Cloudflare handled the rest: it provisioned the SSL certificate, set up HTTPS, and put the files on its CDN without any extra configuration. No nginx, no certbot, no manual renewal.
+
+For a static build there is genuinely no more to it than that. If I later needed server routes or Workers functions I would add the `@astrojs/cloudflare` adapter and switch to `output: "server"`, but for a folder of static files, uploading `dist/` and adding one DNS record was the whole deploy.
+
+---
+
+## Takeaway
+
+The recurring idea is **separation by what changes for what reason**. The algorithm changes when the math changes. The dictionaries change when a language is added. The components change when the interaction changes. None of those bleeds into the others, and the thing keeping them apart is mostly TypeScript's types plus a handful of small functions.
+
+The result is a tool you can learn from: build a program, press play, and watch the algorithm walk the corners of your feasible region one step at a time.
+
+Go [try it](https://simplex.slim.tf/) !

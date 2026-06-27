@@ -33,7 +33,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
   </section>
 
   <!-- Latest writing -->
-  <section class="sl-section-tint sl-reveal">
+  <section class="sl-section-tint sl-reveal" id="blog">
     <div class="sl-container sl-section">
       <span class="sl-eyebrow">From the blog</span>
       <h2>Latest writing</h2>
@@ -60,12 +60,39 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
   <section class="sl-container sl-section sl-reveal" id="about">
     <span class="sl-eyebrow">About</span>
     <h2>A little about me</h2>
-    <p style="max-width:60ch;color:var(--sl-text-secondary);font-size:var(--sl-text-lg)">
-      Replace this with your bio: what you do, what you care about, and what
-      you're looking for. Keep it short and human.
-    </p>
-    <div style="margin-top:var(--sl-space-6)" id="contact">
-      <a class="sl-btn sl-btn-primary" href="mailto:you@example.com">Get in touch</a>
+    <div style="max-width:64ch;color:var(--sl-text-secondary);font-size:var(--sl-text-lg);display:flex;flex-direction:column;gap:var(--sl-space-4)">
+      <p>
+        I'm a software developer based in Lyon, currently working on industrial
+        test automation software. I mostly work with <span class="sl-accent-text">.NET</span>,
+        and I enjoy thinking about how to structure systems so they stay reliable
+        and easy to maintain. I also have a strong mathematical background that
+        shapes how I approach problems.
+      </p>
+      <p>
+        In my free time, I develop <strong style="color:var(--sl-text-primary)">Elsa-Mina</strong>,
+        a .NET Pokémon Showdown bot framework built around dependency injection
+        and a plugin-based design, backed by EF Core and OpenTelemetry for
+        observability. I also maintain a few open-source NuGet packages.
+      </p>
+      <p style="margin-bottom:var(--sl-space-1)">My main interests include:</p>
+      <div style="display:flex;flex-wrap:wrap;gap:var(--sl-space-2)">
+        <span class="sl-badge">Backend &amp; Systems Programming</span>
+        <span class="sl-badge">Software Architecture</span>
+        <span class="sl-badge">Performance Optimization</span>
+        <span class="sl-badge">CI/CD</span>
+      </div>
+      <p>
+        I'm also genuinely interested in AI, not just using it but understanding
+        how it works and building thoughtful workflows around it, while keeping a
+        critical eye and staying grounded in the fundamentals.
+      </p>
+      <p>
+        I try to keep my code simple and efficient, and I like digging into the
+        low-level details to understand how things work and make them a bit faster.
+      </p>
+    </div>
+    <div style="margin-top:var(--sl-space-6);display:flex;gap:var(--sl-space-3);flex-wrap:wrap" id="contact">
+      <a class="sl-btn sl-btn-primary" href="mailto:slimane.fakani.dev@gmail.com">Get in touch</a>
     </div>
   </section>
 </BaseLayout>
