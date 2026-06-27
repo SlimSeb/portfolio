@@ -69,7 +69,7 @@ const {
         ctx.stroke();
       }
 
-      const move = reduce ? 0 : (t * 0.0009) % 1;
+      const move = reduce ? 0 : (t * 0.00005) % 1;
       for (let r = 0; r < 22; r++) {
         const p = (r / 22 + move) % 1,
           ease = p * p;
