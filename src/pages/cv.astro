@@ -1,0 +1,196 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const experience = [
+  {
+    role: "Software Engineer",
+    org: "Capgemini C&CA",
+    period: "Sep 2022 - Dec 2024",
+    items: [
+      {
+        heading: "France Travail (public employment service) : Dec 2022 - Dec 2024",
+        points: [
+          "Cross-platform mobile development on two public-facing apps with Xamarin.Forms and .NET MAUI (.NET, C#).",
+          "Led the migration of the apps to .NET MAUI, from initial design through to a successful production release.",
+          "Maintained internal libraries and the CI/CD chain (GitLab CI/CD, NuGet, Gradle).",
+          "Set up production monitoring tooling (Firebase, App Center, AppDynamics).",
+        ],
+      },
+      {
+        heading: "Shared delivery platform : Sep 2022 - Dec 2022",
+        points: [
+          "Worked across an ecosystem of interconnected apps (Android, Xamarin, Angular, ASP.NET).",
+          "Evolved and maintained legacy mobile apps (Android, Java, Xamarin).",
+        ],
+      },
+      {
+        heading: "End-of-studies internship : Apr 2022 - Sep 2022",
+        points: [
+          "Designed and built a mobile app for security agents (Android, Java).",
+        ],
+      },
+    ],
+  },
+  {
+    role: "Software Engineering Intern",
+    org: "InTest",
+    period: "Apr 2021 - Sep 2021",
+    items: [
+      {
+        heading: null,
+        points: [
+          "Wrote a driver for IO-Link technologies (.NET, WinForms).",
+          "Built a web app for creating and displaying 3D views (React, Unity, .NET).",
+        ],
+      },
+    ],
+  },
+];
+
+const education = [
+  {
+    title: "Engineering degree in Computer Science",
+    org: "ISIMA",
+    period: "2019 - 2022",
+    points: [
+      "Top of the year group in first year (1/118).",
+      "Tutored project (2021): automated messaging web service (Spring Boot, React, PostgreSQL).",
+      "Tutored project (2020): optimisation and compression for quantum computing (Qiskit, C++).",
+    ],
+  }
+];
+
+const skills = [
+  {
+    label: "Mobile",
+    items: ["Xamarin.Forms", ".NET MAUI (C#)", "Native Android (Kotlin, Java)"],
+  },
+  { label: "Web front-end", items: ["Angular", "React (TypeScript, JavaScript)"] },
+  { label: "Web back-end", items: ["ASP.NET (C#)", "Spring (Java)"] },
+  {
+    label: "DevOps & tooling",
+    items: ["GitLab CI/CD", "Docker", "Gradle", "Maven", "NuGet", "S3"],
+  },
+  { label: "Databases", items: ["PostgreSQL", "MS SQL Server"] },
+  { label: "Cloud", items: ["Azure (AZ-900 certified)"] },
+];
+
+const languages = [
+  "English: C1 (TOEIC 990, Cambridge FCE)",
+  "Spanish: B1 (Intermediate)",
+];
+
+const methods = ["Scrum / Agile (PSPO1 certified, Jan 2024)"];
+---
+
+<BaseLayout
+  title="CV | slim.tf"
+  description="Curriculum vitae of slim.tf: software engineer working in .NET and cross-platform mobile."
+>
+  <section class="sl-container sl-section">
+    <span class="sl-eyebrow">Curriculum vitae</span>
+    <h1 style="margin-bottom:var(--sl-space-2)">Slimane F.</h1>
+    <p style="color:var(--sl-text-secondary);font-size:var(--sl-text-lg);margin-bottom:var(--sl-space-4)">
+      Software Engineer · France
+    </p>
+    <div style="display:flex;gap:var(--sl-space-3);flex-wrap:wrap">
+      <a class="sl-btn sl-btn-primary" href="mailto:slimane.fakani.dev@gmail.com">Get in touch</a>
+      <a class="sl-btn sl-btn-secondary" href="/">Back home</a>
+    </div>
+  </section>
+
+  <!-- Experience -->
+  <section class="sl-container sl-section">
+    <span class="sl-eyebrow">Experience</span>
+    <h2>Where I've worked</h2>
+    <div style="display:flex;flex-direction:column;gap:var(--sl-space-6);margin-top:var(--sl-space-4)">
+      {
+        experience.map((job) => (
+          <div class="sl-card">
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--sl-space-2);align-items:baseline">
+              <h3 style="margin:0">
+                {job.role} · <span class="sl-accent-text">{job.org}</span>
+              </h3>
+              <span style="color:var(--sl-text-muted);font-size:var(--sl-text-sm)">{job.period}</span>
+            </div>
+            {job.items.map((item) => (
+              <div style="margin-top:var(--sl-space-4)">
+                {item.heading && (
+                  <p style="font-weight:500;color:var(--sl-text-secondary);margin-bottom:var(--sl-space-2)">
+                    {item.heading}
+                  </p>
+                )}
+                <ul style="margin:0;padding-left:1.2em;color:var(--sl-text-secondary);display:flex;flex-direction:column;gap:var(--sl-space-1)">
+                  {item.points.map((p) => (
+                    <li>{p}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section class="sl-section-tint">
+    <div class="sl-container sl-section">
+      <span class="sl-eyebrow">Education</span>
+      <h2>How I trained</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--sl-space-6);margin-top:var(--sl-space-4)">
+        {
+          education.map((ed) => (
+            <div class="sl-card">
+              <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--sl-space-2);align-items:baseline">
+                <h3 style="margin:0">{ed.title}</h3>
+                <span style="color:var(--sl-text-muted);font-size:var(--sl-text-sm)">{ed.period}</span>
+              </div>
+              <p style="color:var(--sl-accent-ink);margin:var(--sl-space-1) 0 var(--sl-space-3)">{ed.org}</p>
+              <ul style="margin:0;padding-left:1.2em;color:var(--sl-text-secondary);display:flex;flex-direction:column;gap:var(--sl-space-1)">
+                {ed.points.map((p) => (
+                  <li>{p}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="sl-container sl-section">
+    <span class="sl-eyebrow">Skills</span>
+    <h2>What I work with</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--sl-space-6);margin-top:var(--sl-space-4)">
+      {
+        skills.map((group) => (
+          <div class="sl-card">
+            <h3 style="margin:0 0 var(--sl-space-3)">{group.label}</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:var(--sl-space-2)">
+              {group.items.map((item) => (
+                <span class="sl-badge">{item}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--sl-space-6);margin-top:var(--sl-space-6)">
+      <div class="sl-card">
+        <h3 style="margin:0 0 var(--sl-space-3)">Languages</h3>
+        <ul style="margin:0;padding-left:1.2em;color:var(--sl-text-secondary);display:flex;flex-direction:column;gap:var(--sl-space-1)">
+          {languages.map((l) => <li>{l}</li>)}
+        </ul>
+      </div>
+      <div class="sl-card">
+        <h3 style="margin:0 0 var(--sl-space-3)">Methods</h3>
+        <ul style="margin:0;padding-left:1.2em;color:var(--sl-text-secondary);display:flex;flex-direction:column;gap:var(--sl-space-1)">
+          {methods.map((m) => <li>{m}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
