@@ -16,12 +16,99 @@
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const TEAL = "63,169,161";
+    const LAND = "44,138,131"; // deeper teal for the map layer + marker
     const MERIDIANS = 14;
     const PARALLELS = 7;
     const SEG = 40; // samples per line
     const AUTO_SPIN = reduce ? 0 : 0.0022; // idle rotation per frame
     const DRAG_TILT_MIN = -1.2;
     const DRAG_TILT_MAX = 1.2;
+    const DEG = Math.PI / 180;
+
+    // Approximate Lyon, France.
+    const LYON = { lng: 4.83, lat: 45.76 };
+
+    // Low-poly continent outlines, each a closed loop of [lng, lat].
+    const CONTINENTS: [number, number][][] = [
+      // North America (incl. Central America down to Panama)
+      [[-156, 71], [-140, 70], [-125, 70], [-110, 69], [-95, 70], [-88, 73],
+       [-75, 73], [-68, 66], [-60, 55], [-55, 52], [-65, 45], [-70, 42],
+       [-74, 39], [-76, 36], [-81, 31], [-80, 25], [-82, 28], [-84, 30],
+       [-90, 29], [-94, 29], [-97, 26], [-95, 19], [-92, 18], [-90, 21],
+       [-87, 21], [-88, 16], [-83, 10], [-80, 9], [-83, 8], [-87, 13],
+       [-92, 15], [-96, 16], [-105, 20], [-110, 23], [-115, 28], [-117, 32],
+       [-121, 35], [-124, 40], [-124, 46], [-123, 49], [-130, 54], [-135, 58],
+       [-140, 60], [-148, 60], [-152, 59], [-158, 56], [-162, 59], [-165, 62],
+       [-164, 66], [-160, 68]],
+      // Greenland
+      [[-45, 60], [-42, 64], [-40, 68], [-22, 70], [-20, 73], [-22, 76],
+       [-30, 81], [-40, 83], [-55, 83], [-60, 80], [-58, 76], [-53, 70],
+       [-50, 66], [-48, 62]],
+      // Iceland
+      [[-22, 64], [-18, 66], [-14, 65], [-15, 64], [-19, 63]],
+      // South America
+      [[-78, 8], [-72, 11], [-64, 11], [-60, 5], [-50, 0], [-44, -2], [-38, -5],
+       [-35, -8], [-38, -13], [-39, -18], [-42, -23], [-48, -26], [-54, -34],
+       [-58, -39], [-63, -41], [-65, -45], [-69, -50], [-74, -53], [-75, -50],
+       [-73, -45], [-73, -40], [-72, -35], [-71, -30], [-70, -23], [-70, -18],
+       [-76, -14], [-78, -8], [-81, -6], [-81, -3], [-80, 1]],
+      // Africa
+      [[-17, 15], [-16, 20], [-12, 24], [-10, 28], [-6, 32], [-2, 35], [3, 37],
+       [10, 37], [11, 33], [20, 32], [25, 32], [31, 31], [33, 28], [35, 24],
+       [37, 19], [40, 15], [43, 11], [48, 12], [51, 12], [49, 8], [44, 5],
+       [42, -2], [40, -8], [39, -12], [35, -18], [33, -26], [28, -33], [20, -35],
+       [16, -29], [12, -18], [9, -5], [9, 3], [5, 5], [-4, 5], [-8, 4],
+       [-13, 8], [-16, 12]],
+      // Madagascar
+      [[44, -16], [47, -15], [50, -16], [50, -21], [47, -25], [44, -22], [43, -19]],
+      // Eurasia (Europe + Asia + Arabia as one landmass; Mediterranean is a
+      // notch in the south, Black/Caspian seas are treated as interior)
+      [// Atlantic + Arctic coast, west to east
+       [-9, 36], [-9, 43], [-2, 44], [-4, 48], [0, 49], [2, 51], [4, 53],
+       [8, 57], [6, 58], [5, 61], [8, 63], [12, 65], [15, 68], [18, 69],
+       [22, 70], [28, 71], [40, 67], [55, 68], [62, 69], [69, 73], [73, 73],
+       [80, 73], [95, 78], [105, 77], [113, 74], [125, 74], [140, 73],
+       [150, 72], [160, 70], [170, 67], [173, 64],
+       // Pacific coast, north to south
+       [170, 60], [163, 57], [158, 52], [155, 54], [150, 59], [143, 53],
+       [140, 48], [133, 44], [131, 43], [130, 38], [126, 40], [125, 38],
+       [122, 40], [121, 37], [120, 34], [122, 31], [121, 28], [118, 24],
+       [115, 22], [110, 21], [108, 16], [109, 11], [106, 9], [104, 9],
+       [103, 1], [100, 6], [98, 12], [98, 16], [94, 16], [92, 21], [90, 22],
+       [88, 21], [83, 18], [80, 13], [77, 8], [76, 11], [75, 17], [72, 21],
+       [69, 22], [66, 25], [61, 25], [57, 25],
+       // Arabian peninsula (Persian Gulf + Red Sea)
+       [57, 22], [54, 17], [48, 13], [43, 13], [40, 16], [38, 21], [35, 28],
+       // Levant + north Mediterranean coast, east to west
+       [35, 31], [36, 36], [30, 37], [27, 40], [23, 40], [20, 39], [19, 42],
+       [16, 40], [18, 45], [13, 46], [12, 44], [14, 41], [9, 44], [4, 43],
+       [-2, 40], [-6, 37]],
+      // Sumatra
+      [[95, 5], [100, 1], [104, -3], [102, -5], [98, -2], [95, 2]],
+      // Java
+      [[105, -6], [114, -8], [114, -7], [106, -6]],
+      // Borneo
+      [[109, 2], [117, 4], [119, 1], [117, -4], [110, -3], [109, 1]],
+      // New Guinea
+      [[131, -1], [141, -3], [147, -7], [150, -10], [144, -9], [138, -8], [132, -5]],
+      // Australia
+      [[114, -22], [114, -26], [116, -31], [115, -34], [120, -34], [124, -33],
+       [129, -32], [134, -33], [138, -35], [140, -38], [143, -39], [147, -38],
+       [150, -37], [153, -31], [153, -28], [152, -25], [149, -21], [146, -18],
+       [143, -12], [141, -12], [140, -17], [137, -12], [136, -12], [133, -11],
+       [130, -12], [126, -14], [123, -17], [122, -18], [119, -20], [116, -21]],
+      // New Zealand
+      [[173, -35], [176, -38], [178, -38], [177, -41], [174, -41], [172, -43],
+       [170, -46], [167, -46], [170, -43], [172, -40]],
+      // Japan
+      [[130, 31], [131, 33], [135, 34], [137, 37], [140, 38], [141, 41],
+       [143, 42], [141, 39], [138, 37], [136, 35], [133, 34], [131, 32]],
+      // Great Britain
+      [[-5, 50], [-3, 51], [0, 51], [1, 53], [-1, 54], [-2, 56], [-5, 58],
+       [-6, 57], [-5, 55], [-4, 53], [-5, 51]],
+      // Ireland
+      [[-10, 52], [-6, 52], [-6, 55], [-10, 54]],
+    ];
 
     // Orientation, driven by auto-spin or dragging.
     let rot = 0; // longitude
@@ -30,6 +117,18 @@
     let velTilt = 0;
     let dragging = false;
     let raf = 0;
+    // "Fly to Lyon" focus animation + highlight window
+    let focusAnim: {
+      t0: number;
+      dur: number;
+      r0: number;
+      r1: number;
+      tl0: number;
+      tl1: number;
+    } | null = null;
+    let holdUntil = 0; // pause auto-spin until this time
+    let highlightUntil = 0; // emphasise the marker until this time
+    const HIGHLIGHT_MS = 1000;
 
     const resize = () => {
       const w = host.clientWidth,
@@ -113,11 +212,88 @@
         }
         line(pts);
       }
+
+      // low-poly land masses, projected onto the surface (front side only)
+      for (const poly of CONTINENTS) {
+        const pr = poly.map(([lng, lat]) =>
+          project(lat * DEG, lng * DEG, cx, cy, r),
+        );
+        // faint fill from the front-facing vertices for a low-poly look
+        const front = pr.filter((p) => p.z > 0);
+        if (front.length >= 3) {
+          ctx.beginPath();
+          ctx.moveTo(front[0].px, front[0].py);
+          for (let i = 1; i < front.length; i++) ctx.lineTo(front[i].px, front[i].py);
+          ctx.closePath();
+          ctx.fillStyle = `rgba(${LAND},0.08)`;
+          ctx.fill();
+        }
+        // crisp edges, drawn only where both ends face the viewer
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < pr.length; i++) {
+          const a = pr[i],
+            b = pr[(i + 1) % pr.length];
+          if (a.z <= 0 || b.z <= 0) continue;
+          ctx.strokeStyle = `rgba(${LAND},${0.3 + 0.45 * Math.min(a.z, b.z)})`;
+          ctx.beginPath();
+          ctx.moveTo(a.px, a.py);
+          ctx.lineTo(b.px, b.py);
+          ctx.stroke();
+        }
+      }
+
+      // Lyon marker
+      const ly = project(LYON.lat * DEG, LYON.lng * DEG, cx, cy, r);
+      if (ly.z > 0) {
+        const depth = ly.z; // 0..1, larger = nearer
+        const now = performance.now();
+        // 1 right after a "fly to Lyon" click, easing back to 0
+        const hi = Math.max(0, Math.min(1, (highlightUntil - now) / HIGHLIGHT_MS));
+        const pulse = reduce ? 0.5 : 0.5 + 0.5 * Math.sin(now * 0.004);
+        const scale = 0.6 + depth * 0.4;
+        // extra expanding rings while highlighted
+        if (hi > 0 && !reduce) {
+          for (let k = 0; k < 2; k++) {
+            const rp = (now * 0.0016 + k * 0.5) % 1;
+            ctx.beginPath();
+            ctx.arc(ly.px, ly.py, (5 + rp * 24) * scale, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${LAND},${0.55 * hi * (1 - rp) * depth})`;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+        }
+        // base pulse ring
+        ctx.beginPath();
+        ctx.arc(ly.px, ly.py, (4 + pulse * 7) * scale, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${LAND},${0.35 * (1 - pulse) * depth})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // solid dot, swells while highlighted
+        ctx.beginPath();
+        ctx.arc(ly.px, ly.py, (3.2 + hi * 2) * (0.7 + depth * 0.3), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${LAND},${0.85 * depth + 0.15})`;
+        ctx.fill();
+        // label
+        ctx.font =
+          "600 12px ui-sans-serif, system-ui, -apple-system, sans-serif";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = `rgba(18,63,59,${0.85 * depth})`;
+        ctx.fillText("Lyon", ly.px + 9, ly.py - 0.5);
+      }
     };
 
     const tick = () => {
-      if (!dragging) {
-        rot += AUTO_SPIN + velRot;
+      const now = performance.now();
+      if (focusAnim) {
+        // ease toward the orientation that puts Lyon front-and-centre
+        const p = Math.min(1, (now - focusAnim.t0) / focusAnim.dur);
+        const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        rot = focusAnim.r0 + (focusAnim.r1 - focusAnim.r0) * e;
+        tilt = focusAnim.tl0 + (focusAnim.tl1 - focusAnim.tl0) * e;
+        if (p >= 1) focusAnim = null;
+      } else if (!dragging) {
+        const spin = now < holdUntil ? 0 : AUTO_SPIN;
+        rot += spin + velRot;
         tilt = Math.max(DRAG_TILT_MIN, Math.min(DRAG_TILT_MAX, tilt + velTilt));
         velRot *= 0.92; // inertia decay
         velTilt *= 0.92;
@@ -125,9 +301,16 @@
         if (Math.abs(velTilt) < 0.00005) velTilt = 0;
       }
       render();
-      // Keep animating while spinning, throwing, or being dragged; otherwise
-      // settle (this is what lets reduced-motion stay still when idle).
-      if (dragging || AUTO_SPIN !== 0 || velRot !== 0 || velTilt !== 0) {
+      // Keep animating while spinning, throwing, dragging, flying to Lyon, or
+      // showing the highlight; otherwise settle (lets reduced-motion idle).
+      if (
+        dragging ||
+        focusAnim ||
+        AUTO_SPIN !== 0 ||
+        velRot !== 0 ||
+        velTilt !== 0 ||
+        now < highlightUntil
+      ) {
         raf = requestAnimationFrame(tick);
       } else {
         raf = 0;
@@ -183,6 +366,38 @@
     canvas.addEventListener("pointerup", onUp);
     canvas.addEventListener("pointercancel", onUp);
     window.addEventListener("resize", resize);
+
+    // --- "fly to Lyon" focus, triggered from anywhere on the page ---
+    const focusLyon = () => {
+      const now = performance.now();
+      velRot = 0;
+      velTilt = 0;
+      // Lyon faces the viewer when rot = -lng and tilt = lat (see project()).
+      const targetTilt = LYON.lat * DEG;
+      const desired = -LYON.lng * DEG;
+      let d = (desired - rot) % (Math.PI * 2);
+      if (d > Math.PI) d -= Math.PI * 2;
+      if (d < -Math.PI) d += Math.PI * 2;
+      focusAnim = {
+        t0: now,
+        dur: reduce ? 1 : 1100,
+        r0: rot,
+        r1: rot + d,
+        tl0: tilt,
+        tl1: targetTilt,
+      };
+      const settle = (reduce ? 0 : 1100) + HIGHLIGHT_MS;
+      holdUntil = now + settle; // let it linger before auto-spin resumes
+      highlightUntil = reduce ? 0 : now + settle;
+      wake();
+    };
+
+    document.querySelectorAll<HTMLElement>("[data-globe-focus]").forEach((el) =>
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        focusLyon();
+      }),
+    );
 
     resize();
     wake();

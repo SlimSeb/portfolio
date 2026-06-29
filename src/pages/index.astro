@@ -66,8 +66,9 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
     <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,280px);gap:var(--sl-space-8);align-items:start" class="sl-about-grid">
     <div style="max-width:64ch;color:var(--sl-text-secondary);font-size:var(--sl-text-lg);display:flex;flex-direction:column;gap:var(--sl-space-4)">
       <p>
-        I'm a software developer based in Lyon, currently working on industrial
-        test automation software. I mostly work with <span class="sl-accent-text">.NET</span>,
+        I'm a software developer <button type="button" class="sl-globe-focus" data-globe-focus>based in Lyon</button>,
+        currently working on industrial test automation software. I mostly work
+        with <span class="sl-accent-text">.NET</span>,
         and I enjoy thinking about how to structure systems so they stay reliable
         and easy to maintain. I also have a strong mathematical background that
         shapes how I approach problems.

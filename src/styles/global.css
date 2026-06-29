@@ -427,6 +427,23 @@ h3 {
 .sl-globe-canvas.is-dragging {
   cursor: grabbing;
 }
+/* inline text trigger that flies the globe to Lyon */
+.sl-globe-focus {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--sl-accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color var(--sl-ease) 0.15s;
+}
+.sl-globe-focus:hover {
+  color: var(--sl-accent-hover);
+}
 @media (max-width: 820px) {
   .sl-about-grid {
     grid-template-columns: minmax(0, 1fr) !important;
