@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import Card from "../components/Card.astro";
+import Globe from "../components/Globe.astro";
 import PostCard from "../components/PostCard.astro";
 import { getCollection } from "astro:content";
 
@@ -62,6 +63,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
   <section class="sl-container sl-section sl-reveal" id="about">
     <span class="sl-eyebrow">About</span>
     <h2>A little about me</h2>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,280px);gap:var(--sl-space-8);align-items:start" class="sl-about-grid">
     <div style="max-width:64ch;color:var(--sl-text-secondary);font-size:var(--sl-text-lg);display:flex;flex-direction:column;gap:var(--sl-space-4)">
       <p>
         I'm a software developer based in Lyon, currently working on industrial
@@ -92,6 +94,10 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
         I try to keep my code simple and efficient, and I like digging into the
         low-level details to understand how things work and make them a bit faster.
       </p>
+    </div>
+      <div>
+        <Globe />
+      </div>
     </div>
     <div style="margin-top:var(--sl-space-6);display:flex;gap:var(--sl-space-3);flex-wrap:wrap" id="contact">
       <a class="sl-btn sl-btn-primary" href="mailto:slimane.fakani.dev@gmail.com">Get in touch</a>

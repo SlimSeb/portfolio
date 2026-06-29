@@ -1,0 +1,190 @@
+---
+// Wireframe globe: a rotating teal sphere drawn on canvas, matching the
+// hero grid's aesthetic. Zero framework, reduced-motion aware.
+---
+
+<div class="sl-globe">
+  <canvas class="sl-globe-canvas" id="globeCanvas" role="img" aria-label="Rotating wireframe globe (drag to spin)"></canvas>
+</div>
+
+<script>
+  const canvas = document.getElementById("globeCanvas") as HTMLCanvasElement | null;
+  if (canvas) {
+    const ctx = canvas.getContext("2d")!;
+    const host = canvas.parentElement as HTMLElement;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const TEAL = "63,169,161";
+    const MERIDIANS = 14;
+    const PARALLELS = 7;
+    const SEG = 40; // samples per line
+    const AUTO_SPIN = reduce ? 0 : 0.0022; // idle rotation per frame
+    const DRAG_TILT_MIN = -1.2;
+    const DRAG_TILT_MAX = 1.2;
+
+    // Orientation, driven by auto-spin or dragging.
+    let rot = 0; // longitude
+    let tilt = 0.42; // lean the axis toward the viewer a touch
+    let velRot = 0; // inertia after a throw
+    let velTilt = 0;
+    let dragging = false;
+    let raf = 0;
+
+    const resize = () => {
+      const w = host.clientWidth,
+        h = host.clientHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      render();
+    };
+
+    // Project a (latitude, longitude) point on the unit sphere to screen
+    // space, returning x/y and a depth z in [-1, 1] (1 = nearest the viewer).
+    const project = (
+      theta: number,
+      phi: number,
+      cx: number,
+      cy: number,
+      r: number,
+    ) => {
+      const cT = Math.cos(theta);
+      const x = cT * Math.sin(phi + rot);
+      const y = Math.sin(theta);
+      const z = cT * Math.cos(phi + rot);
+      // tilt about the X axis so we look at the globe slightly from above
+      const y2 = y * Math.cos(tilt) - z * Math.sin(tilt);
+      const z2 = y * Math.sin(tilt) + z * Math.cos(tilt);
+      return { px: cx + r * x, py: cy - r * y2, z: z2 };
+    };
+
+    const line = (pts: { px: number; py: number; z: number }[]) => {
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1],
+          b = pts[i];
+        const depth = (a.z + b.z) / 2; // -1 (back) .. 1 (front)
+        const alpha = 0.05 + 0.33 * ((depth + 1) / 2);
+        ctx.strokeStyle = `rgba(${TEAL},${alpha})`;
+        ctx.lineWidth = depth > 0 ? 1.4 : 1;
+        ctx.beginPath();
+        ctx.moveTo(a.px, a.py);
+        ctx.lineTo(b.px, b.py);
+        ctx.stroke();
+      }
+    };
+
+    const render = () => {
+      const w = host.clientWidth,
+        h = host.clientHeight;
+      const cx = w / 2,
+        cy = h / 2;
+      const r = Math.min(w, h) * 0.4;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // soft halo behind the sphere
+      const halo = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r * 1.35);
+      halo.addColorStop(0, `rgba(${TEAL},0.12)`);
+      halo.addColorStop(1, `rgba(${TEAL},0)`);
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.35, 0, Math.PI * 2);
+      ctx.fill();
+
+      // meridians (lines of longitude)
+      for (let m = 0; m < MERIDIANS; m++) {
+        const phi = (m / MERIDIANS) * Math.PI * 2;
+        const pts = [];
+        for (let i = 0; i <= SEG; i++) {
+          const theta = -Math.PI / 2 + (i / SEG) * Math.PI;
+          pts.push(project(theta, phi, cx, cy, r));
+        }
+        line(pts);
+      }
+
+      // parallels (lines of latitude)
+      for (let p = 1; p <= PARALLELS; p++) {
+        const theta = -Math.PI / 2 + (p / (PARALLELS + 1)) * Math.PI;
+        const pts = [];
+        for (let i = 0; i <= SEG; i++) {
+          const phi = (i / SEG) * Math.PI * 2;
+          pts.push(project(theta, phi, cx, cy, r));
+        }
+        line(pts);
+      }
+    };
+
+    const tick = () => {
+      if (!dragging) {
+        rot += AUTO_SPIN + velRot;
+        tilt = Math.max(DRAG_TILT_MIN, Math.min(DRAG_TILT_MAX, tilt + velTilt));
+        velRot *= 0.92; // inertia decay
+        velTilt *= 0.92;
+        if (Math.abs(velRot) < 0.00005) velRot = 0;
+        if (Math.abs(velTilt) < 0.00005) velTilt = 0;
+      }
+      render();
+      // Keep animating while spinning, throwing, or being dragged; otherwise
+      // settle (this is what lets reduced-motion stay still when idle).
+      if (dragging || AUTO_SPIN !== 0 || velRot !== 0 || velTilt !== 0) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        raf = 0;
+      }
+    };
+
+    const wake = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+
+    // --- drag to spin ---
+    let lastX = 0,
+      lastY = 0;
+
+    const onDown = (e: PointerEvent) => {
+      dragging = true;
+      velRot = 0;
+      velTilt = 0;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+      canvas.classList.add("is-dragging");
+      wake();
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      const dRot = dx * 0.01;
+      const dTilt = dy * 0.01;
+      rot += dRot;
+      tilt = Math.max(DRAG_TILT_MIN, Math.min(DRAG_TILT_MAX, tilt + dTilt));
+      velRot = dRot; // carried into inertia on release
+      velTilt = dTilt;
+      render();
+    };
+
+    const onUp = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      canvas.classList.remove("is-dragging");
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch {}
+      wake();
+    };
+
+    canvas.addEventListener("pointerdown", onDown);
+    canvas.addEventListener("pointermove", onMove);
+    canvas.addEventListener("pointerup", onUp);
+    canvas.addEventListener("pointercancel", onUp);
+    window.addEventListener("resize", resize);
+
+    resize();
+    wake();
+  }
+</script>
