@@ -1,4 +1,6 @@
 ---
+import Crow from "./Crow.astro";
+
 const links = [
   { href: "/#work", label: "Work" },
   { href: "/#blog", label: "Blog" },
@@ -8,6 +10,7 @@ const links = [
 
 <div class="sl-nav-wrap">
   <nav class="sl-nav" aria-label="Primary">
+    <!-- <Crow class="sl-nav-crow" thick strokeWidth={10} aria-hidden="true" /> -->
     <a class="sl-nav-brand" href="/">slim.tf</a>
     <div class="sl-nav-links">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}

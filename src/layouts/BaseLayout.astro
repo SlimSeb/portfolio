@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import Nav from "../components/Nav.astro";
+import Crow from "../components/Crow.astro";
 
 interface Props {
   title: string;
@@ -50,7 +51,10 @@ const {
     }
 
     <footer class="sl-container" style="padding-block:var(--sl-space-12);border-top:1px solid var(--sl-border);margin-top:var(--sl-space-16);color:var(--sl-text-muted);font-size:var(--sl-text-sm);display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--sl-space-4)">
-      <span>© {new Date().getFullYear()} slim.tf</span>
+      <span style="display:inline-flex;align-items:center;gap:var(--sl-space-2)">
+        <Crow class="sl-footer-crow" thick strokeWidth={15} aria-hidden="true" />
+        © {new Date().getFullYear()} slim.tf
+      </span>
       <span style="display:flex;gap:var(--sl-space-6)">
         <a href="/rss.xml" style="color:var(--sl-accent-ink)">RSS</a>
         <a href="https://github.com/SlimSeb" style="color:var(--sl-accent-ink)" target="_blank" rel="noopener noreferrer">GitHub</a>

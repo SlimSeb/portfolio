@@ -338,12 +338,21 @@ h3 {
   backdrop-filter: blur(12px);
 }
 .sl-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sl-space-2);
   font-family: var(--sl-font-display);
   font-weight: var(--sl-weight-black);
   font-size: var(--sl-text-lg);
   color: var(--sl-text-primary);
   text-decoration: none;
   letter-spacing: -0.01em;
+}
+.sl-nav-crow {
+  width: 50px;
+  height: auto;
+  flex: none;
+  color: var(--sl-accent-ink);
 }
 .sl-nav-links {
   position: absolute;
@@ -406,6 +415,31 @@ h3 {
   position: relative;
   z-index: 2;
   padding: var(--sl-space-8);
+}
+.sl-hero-crow {
+  position: absolute;
+  z-index: 1;
+  top: 8%;
+  right: -4%;
+  width: 460px;
+  max-width: 55%;
+  height: auto;
+  color: var(--sl-accent-ink);
+  opacity: 0.12;
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .sl-hero-crow {
+    width: 320px;
+    right: -12%;
+    opacity: 0.1;
+  }
+}
+.sl-footer-crow {
+  width: 30px;
+  height: auto;
+  flex: none;
+  color: var(--sl-accent);
 }
 
 /* Wireframe globe (About section visual) */

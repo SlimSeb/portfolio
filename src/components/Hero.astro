@@ -5,6 +5,8 @@ interface Props {
   accent?: string;
   subtitle?: string;
 }
+import Crow from "./Crow.astro";
+
 const {
   eyebrow = "Designer & developer",
   title = "I build things",
@@ -15,6 +17,7 @@ const {
 
 <div class="sl-hero">
   <canvas class="sl-hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+  <Crow class="sl-hero-crow" aria-hidden="true" />
   <div class="sl-hero-inner">
     <span class="sl-badge">{eyebrow}</span>
     <h1>{title}<br /><span class="sl-accent-text">{accent}</span></h1>
