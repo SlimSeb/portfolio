@@ -1,0 +1,54 @@
+---
+interface Props {
+  /** CSS var name to display, e.g. "--sl-accent" */
+  token: string;
+  /** Human label, e.g. "Accent" */
+  label: string;
+  /** Optional hex/value note shown under the label */
+  value?: string;
+  /** Show a dark ring instead of light (for very light swatches) */
+}
+const { token, label, value } = Astro.props;
+---
+
+<div class="sl-swatch">
+  <div class="sl-swatch-color" style={`background: var(${token})`}></div>
+  <div class="sl-swatch-meta">
+    <b>{label}</b>
+    <code>{token}</code>
+    {value && <span>{value}</span>}
+  </div>
+</div>
+
+<style>
+  .sl-swatch {
+    border-radius: var(--sl-radius-md);
+    overflow: hidden;
+    border: 1px solid var(--sl-border);
+    background: var(--sl-bg-surface);
+  }
+  .sl-swatch-color {
+    height: 72px;
+    border-bottom: 1px solid var(--sl-border);
+  }
+  .sl-swatch-meta {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.8rem;
+  }
+  .sl-swatch-meta b {
+    color: var(--sl-text-primary);
+  }
+  .sl-swatch-meta code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--sl-accent-ink);
+  }
+  .sl-swatch-meta span {
+    color: var(--sl-text-muted);
+    font-family: ui-monospace, monospace;
+    font-size: 0.72rem;
+  }
+</style>

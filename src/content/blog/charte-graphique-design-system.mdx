@@ -1,0 +1,212 @@
+---
+title: "Charte graphique : Design System Slopovitch"
+description: "La référence du design system Slopovitch : couleurs, typographie, espacements et composants. Chaque exemple est rendu avec le vrai code du site."
+pubDate: 2026-06-27
+tags: ["design system", "charte graphique", "référence"]
+---
+
+import Swatch from "../../components/Swatch.astro";
+import SpecimenGrid from "../../components/SpecimenGrid.astro";
+import Card from "../../components/Card.astro";
+
+Cette page sert de référence pour le design system du site. Plutôt qu'un
+article, c'est une charte : tous les échantillons ci-dessous sont rendus avec
+le code réel du système.
+
+## Principes
+
+Avant d'entrer dans le détail, voilà les règles que je m'impose. Presque
+toutes les décisions plus bas en découlent.
+
+<Card title="Une seule couleur d'accent">
+  Un bleu sarcelle, décliné en quelques teintes dont une version « encre » assez foncée
+  pour du texte. Je ne m'autorise pas de deuxième couleur : c'est cette
+  contrainte qui garde le système cohérent. Un portfolio/blog a une hiérarchie de l'information simple : lire ceci, cliquer là, ça c'est un lien... 
+  Une seule teinte sarcelle accentuée, avec ses nuances et une teinte d'encre foncée, couvre déjà tout cela, et cette sobriété constitue en elle-même l'esthétique 
+</Card>
+
+<Card title="Sobriété d'abord">
+  Le dégradé est réservé à l'emphase. Les surfaces restent claires, les ombres
+  légères, et je préfère laisser de l'espace plutôt que remplir.
+</Card>
+
+## Couleurs
+
+### Accent
+
+Le bleu sarcelle est la seule couleur de marque. On le retrouve dans les liens, le
+dégradé des boutons primaires, les puces de listes et la grille animée du
+hero. C'est tout, volontairement.
+
+<SpecimenGrid>
+  <Swatch token="--sl-accent" label="Accent" value="#5EC8C0" />
+  <Swatch token="--sl-accent-hover" label="Accent hover" value="#45B3AB" />
+  <Swatch token="--sl-accent-soft" label="Accent soft" value="#DBF1EF" />
+  <Swatch token="--sl-accent-ink" label="Accent ink" value="#1F706A" />
+</SpecimenGrid>
+
+`accent` est la teinte vive de base et `accent-hover` sa version assombrie
+pour le survol. `accent-soft` sert de fond aux badges et aux remplissages
+légers. Quant à `accent-ink`, c'est la seule nuance assez sombre pour rester
+lisible en texte sur fond clair, d'où son usage pour les liens.
+
+### Surfaces et texte
+
+Les surfaces vont du fond de page à la surface surélevée, et le texte se
+décline en trois niveaux de hiérarchie.
+
+<SpecimenGrid>
+  <Swatch token="--sl-bg-base" label="Base" value="#F7FAFA" />
+  <Swatch token="--sl-bg-surface" label="Surface" value="#FFFFFF" />
+  <Swatch token="--sl-bg-surface-2" label="Surface 2" value="#EDF4F4" />
+  <Swatch token="--sl-text-primary" label="Texte" value="#1A2B2A" />
+  <Swatch token="--sl-text-secondary" label="Texte secondaire" value="#566766" />
+  <Swatch token="--sl-text-muted" label="Texte discret" value="#8A9897" />
+</SpecimenGrid>
+
+### États
+
+Trois couleurs sémantiques pour les retours d'information : succès, alerte,
+erreur. Elles ne font pas partie de la palette de marque, et je ne les utilise
+pas pour décorer.
+
+<SpecimenGrid>
+  <Swatch token="--sl-success" label="Succès" value="#3AA76D" />
+  <Swatch token="--sl-warning" label="Alerte" value="#D9942B" />
+  <Swatch token="--sl-error" label="Erreur" value="#D9534F" />
+</SpecimenGrid>
+
+### Dégradés
+
+Le système compte trois dégradés, tous construits sur le même bleu. Ils
+servent à mettre quelque chose en avant, pas à couvrir de grandes zones.
+
+- `--sl-gradient-text` : le mot d'accent d'un titre, les grands chiffres.
+- `--sl-gradient-accent` : le fond des boutons primaires.
+- `--sl-gradient-header` : le bandeau du hero.
+
+<SpecimenGrid min={200}>
+  <div style="height:72px;border-radius:var(--sl-radius-md);background:var(--sl-gradient-text)"></div>
+  <div style="height:72px;border-radius:var(--sl-radius-md);background:var(--sl-gradient-accent)"></div>
+  <div style="height:72px;border-radius:var(--sl-radius-md);background:var(--sl-gradient-header);border:1px solid var(--sl-border)"></div>
+</SpecimenGrid>
+
+## Typographie
+
+Deux familles : Sora pour l'affichage (titres, chiffres, marque) et Inter pour
+le texte courant. Sora donne du caractère aux titres, Inter se fait oublier
+dans les longs paragraphes, ce qui est exactement ce qu'on lui demande.
+
+<div style="font-family:var(--sl-font-display);font-weight:800;font-size:var(--sl-text-hero);line-height:1.1;color:var(--sl-text-primary)">
+  Sora Display
+</div>
+<div style="font-family:var(--sl-font-body);font-size:var(--sl-text-lg);color:var(--sl-text-secondary);margin-top:0.5em">
+  Inter, le corps de texte, pensé pour la lecture longue.
+</div>
+
+L'échelle typographique est fluide (`clamp`) pour les grands niveaux et fixe
+pour le texte courant :
+
+| Token | Rôle | Taille |
+| --- | --- | --- |
+| `--sl-text-hero` | Titre de hero | clamp(2.5rem → 4.5rem) |
+| `--sl-text-h2` | Titre de section | clamp(1.75rem → 2.75rem) |
+| `--sl-text-h3` | Sous-titre | 1.5rem |
+| `--sl-text-lg` | Chapô, accroche | 1.125rem |
+| `--sl-text-base` | Corps | 1rem |
+| `--sl-text-sm` | Légende, méta | 0.875rem |
+
+Côté graisses, trois suffisent : 800 pour les titres et les chiffres, 700 pour
+les sous-titres et les boutons, 400 à 500 pour le texte.
+
+## Espacements et rayons
+
+L'espacement suit une échelle de base 4px (`--sl-space-2` à `--sl-space-32`),
+ce qui garde un rythme vertical régulier entre les sections. Pour les rayons,
+il y en a quatre.
+
+<SpecimenGrid min={120}>
+  <div style="text-align:center">
+    <div style="height:64px;background:var(--sl-accent-soft);border:1px solid var(--sl-border-accent);border-radius:var(--sl-radius-sm)"></div>
+    <code style="font-size:0.72rem;color:var(--sl-accent-ink)">radius-sm · 8px</code>
+  </div>
+  <div style="text-align:center">
+    <div style="height:64px;background:var(--sl-accent-soft);border:1px solid var(--sl-border-accent);border-radius:var(--sl-radius-md)"></div>
+    <code style="font-size:0.72rem;color:var(--sl-accent-ink)">radius-md · 14px</code>
+  </div>
+  <div style="text-align:center">
+    <div style="height:64px;background:var(--sl-accent-soft);border:1px solid var(--sl-border-accent);border-radius:var(--sl-radius-lg)"></div>
+    <code style="font-size:0.72rem;color:var(--sl-accent-ink)">radius-lg · 20px</code>
+  </div>
+  <div style="text-align:center">
+    <div style="height:64px;background:var(--sl-accent-soft);border:1px solid var(--sl-border-accent);border-radius:var(--sl-radius-pill)"></div>
+    <code style="font-size:0.72rem;color:var(--sl-accent-ink)">radius-pill</code>
+  </div>
+</SpecimenGrid>
+
+En pratique : `radius-md` pour les blocs de contenu et les vignettes,
+`radius-lg` pour les cartes, `radius-pill` pour tout ce qui est interactif et
+compact (boutons, badges, navigation).
+
+## Composants
+
+### Boutons
+
+Deux variantes. Le primaire porte le dégradé teal et signale l'action
+principale d'un écran ; j'essaie de n'en mettre qu'un par vue. Le secondaire,
+neutre et bordé, couvre les actions de second rang.
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:1.2em 0">
+  <a class="sl-btn sl-btn-primary" href="#">Action primaire</a>
+  <a class="sl-btn sl-btn-secondary" href="#">Action secondaire</a>
+</div>
+
+### Badges
+
+Une pastille compacte pour une étiquette, un tag ou un statut. Fond en teinte
+douce, texte en encre, bordure d'accent.
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:1.2em 0">
+  <span class="sl-badge">design system</span>
+  <span class="sl-badge">✦ nouveau</span>
+  <span class="sl-badge">référence</span>
+</div>
+
+### Cartes
+
+Le conteneur de contenu par défaut : surface surélevée, bordure fine, ombre
+douce, coins `radius-lg`. Au survol, la bordure passe à l'accent et la carte
+se soulève légèrement.
+
+<SpecimenGrid min={240}>
+  <Card title="Avec icône" icon="◆">
+    Une carte accepte une icône optionnelle et du contenu libre via son slot.
+  </Card>
+  <Card title="Sans icône">
+    La même carte, sans icône, pour un contenu plus sobre.
+  </Card>
+</SpecimenGrid>
+
+### Navigation
+
+La barre de navigation est une pastille flottante, détachée du bord, en teal
+translucide avec une bordure d'accent et un flou d'arrière-plan. Elle reste
+sticky sur toute la hauteur de page. Vous la voyez en haut de cet écran.
+
+## Mode sombre
+
+Le thème sombre ne réécrit aucun composant. Il redéfinit les mêmes tokens sous
+`[data-theme="dark"]`, et tout suit : les utilitaires, le CSS des composants,
+les dégradés, les ombres, jusqu'à la grille du hero. Le bouton soleil/lune de
+la navigation bascule d'un thème à l'autre et mémorise le choix.
+
+D'où la règle de ne jamais coder une couleur en dur. Une couleur écrite en dur
+ne basculera pas, et c'est le genre de bug qu'on ne remarque que des semaines
+plus tard, sur la mauvaise page.
+
+## Comment tout tient ensemble
+
+Les tokens définissent l'apparence, les composants les réutilisent, et la
+classe `.sl-prose` applique le tout au texte long des articles. Tant que je
+passe par les tokens et que je m'en tiens à un seul accent, le reste suit, sur
+tous les écrans et dans les deux thèmes.

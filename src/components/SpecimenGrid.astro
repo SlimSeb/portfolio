@@ -1,0 +1,20 @@
+---
+interface Props {
+  /** min column width in px */
+  min?: number;
+}
+const { min = 150 } = Astro.props;
+---
+
+<div class="sl-specimen-grid" style={`--min:${min}px`}>
+  <slot />
+</div>
+
+<style>
+  .sl-specimen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--min), 1fr));
+    gap: var(--sl-space-4);
+    margin: 1.4em 0;
+  }
+</style>
