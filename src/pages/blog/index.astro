@@ -8,10 +8,10 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
 );
 ---
 
-<BaseLayout title="Blog | slim.tf" description="Notes on design systems and front-end engineering.">
+<BaseLayout title="Blog | slim.tf" description="Notes on .NET, software architecture, performance, and backend engineering.">
   <section class="sl-container sl-section">
     <span class="sl-eyebrow">Blog</span>
-    <h2>Writing &amp; notes</h2>
+    <h1>Writing &amp; notes</h1>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--sl-space-6);margin-top:var(--sl-space-4)">
       {
         posts.map((post) => (

@@ -10,9 +10,21 @@ import { getCollection } from "astro:content";
 const posts = (await getCollection("blog", ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 3);
+
+const structuredData = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Slimane Fakani",
+  url: new URL("/", Astro.site).href,
+  jobTitle: "Software Developer",
+  address: { "@type": "PostalAddress", addressLocality: "Lyon", addressCountry: "FR" },
+  sameAs: ["https://github.com/SlimSeb"],
+  knowsAbout: [".NET", "C#", "Software Architecture", "Backend Development", "CI/CD"],
+});
 ---
 
 <BaseLayout title="slim.tf: portfolio & blog" padForNav={false}>
+  <script type="application/ld+json" slot="head" is:inline set:html={structuredData} />
   <header class="sl-band" id="top">
     <Hero />
   </header>

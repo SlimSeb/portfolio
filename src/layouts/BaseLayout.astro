@@ -8,12 +8,26 @@ interface Props {
   description?: string;
   /** Set false on the home page where the hero band sits behind the nav. */
   padForNav?: boolean;
+  /** Open Graph type; blog posts pass "article". */
+  type?: "website" | "article";
+  /** Absolute path to a social preview image, e.g. "/og.png". */
+  image?: string;
+  /** Article metadata, only used when type is "article". */
+  publishedTime?: Date;
+  updatedTime?: Date;
 }
 const {
   title,
-  description = "Portfolio and blog of slim.tf: design systems and front-end engineering.",
+  description = "Portfolio and blog of Slimane Sébastien Fakani, a software developer in Lyon working with .NET, writing about software architecture, performance, and backend systems.",
   padForNav = true,
+  type = "website",
+  image = "/og.png",
+  publishedTime,
+  updatedTime,
 } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const socialImage = new URL(image, Astro.site);
 ---
 
 <!doctype html>
@@ -25,10 +39,26 @@ const {
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="slim.tf" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="slim.tf" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+    {updatedTime && <meta property="article:modified_time" content={updatedTime.toISOString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title="slim.tf" href="/rss.xml" />
+    <slot name="head" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

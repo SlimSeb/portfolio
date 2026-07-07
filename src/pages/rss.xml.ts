@@ -6,7 +6,7 @@ export async function GET(context: APIContext) {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
   return rss({
     title: "slim.tf",
-    description: "Notes on design systems and front-end engineering.",
+    description: "Notes on .NET, software architecture, performance, and backend engineering.",
     site: context.site ?? "https://slim.tf",
     items: posts
       .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())

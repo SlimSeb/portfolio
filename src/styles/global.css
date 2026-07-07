@@ -192,6 +192,7 @@ h3 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.sl-section h1,
 .sl-section h2 {
   font-size: var(--sl-text-h2);
   font-weight: var(--sl-weight-black);
