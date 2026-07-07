@@ -135,6 +135,13 @@
   margin: 1.4em 0;
 }
 
+/* Card grid (2-up auto-fit layout used inside posts) */
+.sl-prose .sl-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--sl-space-6);
+}
+
 /* Rules */
 .sl-prose hr {
   border: 0;
