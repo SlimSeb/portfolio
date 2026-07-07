@@ -92,8 +92,6 @@
   --sl-header-text: #123f3b;
   --sl-header-muted: #3f6f6a;
   --sl-gradient-header: linear-gradient(180deg, #d6f0ec 0%, #bce3dd 100%);
-  /* Top color of the hero band; used for macOS overscroll at the top of the page */
-  --sl-header-top: #d6f0ec;
 
   --sl-text-primary: #1a2b2a;
   --sl-text-secondary: #566766;
@@ -148,8 +146,6 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--sl-nav-height);
-  /* So the macOS overscroll area at the top matches the hero band */
-  background: var(--sl-header-top);
 }
 body {
   margin: 0;
