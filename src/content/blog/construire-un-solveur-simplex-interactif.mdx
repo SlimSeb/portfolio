@@ -1,6 +1,6 @@
 ---
-title: "Construire un solveur du Simplexe interactif"
-description: "Notes sur la construction d'un solveur du Simplexe à deux phases en TypeScript, avec Astro, un seul îlot React, Tailwind v4 et Framer Motion, i18n comprise."
+title: "Construire un solveur Simplex interactif"
+description: "Notes sur la construction d'un solveur Simplex à deux phases en TypeScript, avec Astro, un seul îlot React, Tailwind v4 et Framer Motion, i18n comprise."
 pubDate: 2026-06-27
 tags: ["astro", "react", "linear-programming", "typescript", "i18n", "tailwind"]
 author: "Slimane Fakani"
@@ -15,7 +15,7 @@ programme linéaire dans le navigateur, on clique sur « Résoudre », et on peu
 ensuite rejouer chaque pivot itération par itération, en regardant la colonne
 entrante, la ligne sortante et l'élément de pivot se mettre en surbrillance.
 Je l'ai construit à moitié comme support pédagogique, à moitié comme prétexte
-pour écrire une implémentation propre du Simplexe en TypeScript.
+pour écrire une implémentation propre du Simplex en TypeScript.
 
 Dans ce billet : le problème que ça résout, l'algorithme, la stack, et comment
 le site gère l'anglais et le français.
@@ -43,9 +43,9 @@ classique des manuels : combien de lots de deux produits fabriquer avec trois
 ressources limitées. La réponse est `x1 = 2, x2 = 6, Z = 36`, mais l'intérêt
 de l'outil est justement de montrer *comment* l'algorithme y arrive.
 
-## L'algorithme : Simplexe primal à deux phases
+## L'algorithme : Simplex primal à deux phases
 
-La méthode du Simplexe, due à George Dantzig en 1947, parcourt les coins. En
+La méthode du Simplex, due à George Dantzig en 1947, parcourt les coins. En
 partant d'un sommet de la région admissible, elle suit une arête vers un
 sommet voisin qui améliore l'objectif, et s'arrête quand plus aucune arête
 n'améliore rien.
