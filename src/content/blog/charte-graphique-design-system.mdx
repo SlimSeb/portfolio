@@ -116,7 +116,7 @@ pour le texte courant :
 | `--sl-text-base` | Corps | 1rem |
 | `--sl-text-sm` | Légende, méta | 0.875rem |
 
-Côté graisses, trois suffisent : 800 pour les titres et les chiffres, 700 pour
+Côté gras, trois suffisent : 800 pour les titres et les chiffres, 700 pour
 les sous-titres et les boutons, 400 à 500 pour le texte.
 
 ## Espacements et rayons
@@ -152,7 +152,7 @@ compact (boutons, badges, navigation).
 
 ### Boutons
 
-Deux variantes. Le primaire porte le dégradé teal et signale l'action
+Deux variantes. Le primaire porte le dégradé sarcelle et signale l'action
 principale d'un écran ; j'essaie de n'en mettre qu'un par vue. Le secondaire,
 neutre et bordé, couvre les actions de second rang.
 
@@ -189,20 +189,9 @@ se soulève légèrement.
 
 ### Navigation
 
-La barre de navigation est une pastille flottante, détachée du bord, en teal
+La barre de navigation est une pastille flottante, détachée du bord, en bleu sarcelle
 translucide avec une bordure d'accent et un flou d'arrière-plan. Elle reste
-sticky sur toute la hauteur de page. Vous la voyez en haut de cet écran.
-
-## Mode sombre
-
-Le thème sombre ne réécrit aucun composant. Il redéfinit les mêmes tokens sous
-`[data-theme="dark"]`, et tout suit : les utilitaires, le CSS des composants,
-les dégradés, les ombres, jusqu'à la grille du hero. Le bouton soleil/lune de
-la navigation bascule d'un thème à l'autre et mémorise le choix.
-
-D'où la règle de ne jamais coder une couleur en dur. Une couleur écrite en dur
-ne basculera pas, et c'est le genre de bug qu'on ne remarque que des semaines
-plus tard, sur la mauvaise page.
+collante sur toute la hauteur de page.
 
 ## Comment tout tient ensemble
 
