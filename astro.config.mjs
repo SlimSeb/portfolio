@@ -28,8 +28,9 @@ export default defineConfig({
 
   markdown: {
     shikiConfig: {
-      // Code-block theme for MDX posts. Swap for any Shiki theme you like.
-      theme: "github-light",
+      // Dual code-block themes for MDX posts; prose.css switches to the
+      // dark one under [data-theme="dark"] via the --shiki-dark variables.
+      themes: { light: "github-light", dark: "github-dark" },
       wrap: true,
     },
   },

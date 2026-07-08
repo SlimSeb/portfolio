@@ -37,6 +37,28 @@ const socialImage = new URL(image, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+    <script is:inline>
+      // Resolve the theme before first paint to avoid a light flash.
+      // Stored choice wins; otherwise follow the system preference
+      // (and keep following it until the user picks one).
+      (() => {
+        const read = () => {
+          try {
+            return localStorage.getItem("sl-theme");
+          } catch {
+            return null;
+          }
+        };
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        const apply = (dark) => {
+          document.documentElement.dataset.theme = dark ? "dark" : "light";
+        };
+        apply(read() ? read() === "dark" : mq.matches);
+        mq.addEventListener("change", (e) => {
+          if (!read()) apply(e.matches);
+        });
+      })();
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />

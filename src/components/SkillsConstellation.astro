@@ -29,9 +29,17 @@ const SKILLS = [
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     // Palette mirrors the globe so the two visuals read as siblings.
-    const ACCENT = "63,169,161";
-    const DEEP = "44,138,131"; // deeper teal for nodes + emphasis
-    const LABEL = "18,63,59"; // dark teal text
+    // Colors come from the --sl-canvas-* tokens so the theme toggle restyles
+    // the canvas; RGB triplets let the script apply its own alpha.
+    let ACCENT = "", DEEP = "", LABEL = "", RING = "";
+    const readTheme = () => {
+      const s = getComputedStyle(document.documentElement);
+      ACCENT = s.getPropertyValue("--sl-canvas-accent-rgb").trim();
+      DEEP = s.getPropertyValue("--sl-canvas-deep-rgb").trim();
+      LABEL = s.getPropertyValue("--sl-canvas-label-rgb").trim();
+      RING = s.getPropertyValue("--sl-canvas-ring-rgb").trim();
+    };
+    readTheme();
     const AUTO_SPIN = reduce ? 0 : 0.0019;
     const TILT_MIN = -1.2;
     const TILT_MAX = 1.2;
@@ -174,7 +182,7 @@ const SKILLS = [
         ctx.fillStyle = `rgba(${fill},${(0.55 + 0.4 * depth) * dim})`;
         ctx.fill();
         if (n.hub || isHover) {
-          ctx.strokeStyle = `rgba(255,255,255,${0.7 * dim})`;
+          ctx.strokeStyle = `rgba(${RING},${0.7 * dim})`;
           ctx.lineWidth = 1.5;
           ctx.stroke();
         }
@@ -255,6 +263,11 @@ const SKILLS = [
     canvas.addEventListener("pointercancel", onUp);
     canvas.addEventListener("pointerleave", onLeave);
     window.addEventListener("resize", resize);
+
+    new MutationObserver(() => {
+      readTheme();
+      wake(); // repaint with the new palette even when settled
+    }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 
     resize();
     wake();

@@ -38,6 +38,18 @@ const {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let t = 0;
 
+    // Colors come from the --sl-* tokens so the theme toggle restyles the
+    // canvas; RGB triplets let the script apply its own alpha.
+    let grad1 = "", grad2 = "", lineRGB = "", horizonRGB = "";
+    const readTheme = () => {
+      const s = getComputedStyle(document.documentElement);
+      grad1 = s.getPropertyValue("--sl-hero-grad-1").trim();
+      grad2 = s.getPropertyValue("--sl-hero-grad-2").trim();
+      lineRGB = s.getPropertyValue("--sl-canvas-accent-rgb").trim();
+      horizonRGB = s.getPropertyValue("--sl-canvas-deep-rgb").trim();
+    };
+    readTheme();
+
     const resize = () => {
       const w = host.clientWidth,
         h = host.clientHeight;
@@ -56,8 +68,8 @@ const {
       ctx.clearRect(0, 0, w, h);
 
       const bg = ctx.createLinearGradient(0, 0, 0, h);
-      bg.addColorStop(0, "#D6F0EC");
-      bg.addColorStop(1, "#BCE3DD");
+      bg.addColorStop(0, grad1);
+      bg.addColorStop(1, grad2);
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, w, h);
 
@@ -68,7 +80,7 @@ const {
         ctx.beginPath();
         ctx.moveTo(cx + fx * 40, horizon);
         ctx.lineTo(cx + fx * w * 1.6, h);
-        ctx.strokeStyle = `rgba(63,169,161,${0.12 + 0.3 * (1 - Math.abs(fx))})`;
+        ctx.strokeStyle = `rgba(${lineRGB},${0.12 + 0.3 * (1 - Math.abs(fx))})`;
         ctx.stroke();
       }
 
@@ -81,16 +93,22 @@ const {
         ctx.beginPath();
         ctx.moveTo(cx - spread, y);
         ctx.lineTo(cx + spread, y);
-        ctx.strokeStyle = `rgba(63,169,161,${0.08 + 0.34 * ease})`;
+        ctx.strokeStyle = `rgba(${lineRGB},${0.08 + 0.34 * ease})`;
         ctx.stroke();
       }
 
-      ctx.fillStyle = "rgba(44,138,131,0.45)";
+      ctx.fillStyle = `rgba(${horizonRGB},0.45)`;
       ctx.fillRect(0, horizon - 0.5, w, 1);
 
       t += 16;
       if (!reduce) requestAnimationFrame(frame);
     };
     frame();
+
+    new MutationObserver(() => {
+      readTheme();
+      // with reduced motion there is no RAF loop, so repaint once
+      if (reduce) frame();
+    }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
   }
 </script>

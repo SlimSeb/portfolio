@@ -6,8 +6,17 @@ Guidance for Claude Code when working in this repo. Read this before making chan
 
 A static **portfolio + blog** built with **Astro 5 + Tailwind v4 + MDX**, deployed
 to **Cloudflare Pages**. It uses the in-house **design system**: a light
-theme with a single light-teal accent and a subtle single-hue teal gradient. No
-purple, no rainbow gradients, no dark theme.
+theme (default) plus a token-driven dark theme, with a single light-teal accent
+and a subtle single-hue teal gradient. No purple, no rainbow gradients.
+
+Dark mode works via `data-theme` on `<html>`: an inline script in
+`BaseLayout.astro` resolves localStorage (`sl-theme`) or the system preference
+before paint, the toggle lives in `Nav.astro`, and all dark values are token
+overrides in the `:root[data-theme="dark"]` block of `global.css`. Canvas
+scripts read colors from the `--sl-canvas-*` / `--sl-hero-grad-*` tokens and
+re-read them on theme change; code blocks use dual Shiki themes (see
+`astro.config.mjs` + the override in `prose.css`). To restyle dark mode, edit
+the dark token block only.
 
 ## Golden rules
 
@@ -143,6 +152,6 @@ RSS, and canonical URLs depend on it. Only add `@astrojs/cloudflare` +
 
 ## Out of scope unless asked
 
-Dark mode, a second accent color, a CSS framework swap, a UI runtime
+A second accent color, a CSS framework swap, a UI runtime
 (React/Vue), or moving off static rendering. If a request seems to need one of
 these, flag it and propose a token-driven or static alternative first.

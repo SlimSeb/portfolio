@@ -73,6 +73,8 @@
    (gradients, type scale, spacing, nav height).
    ------------------------------------------------------------ */
 :root {
+  color-scheme: light;
+
   --sl-bg-base: #f7fafa;
   --sl-bg-surface: #ffffff;
   --sl-bg-surface-2: #edf4f4;
@@ -138,6 +140,84 @@
   --sl-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --sl-dur: 0.15s;
   --sl-dur-reveal: 1.2s;
+
+  /* Canvas drawing colors (hero grid, globe, skills constellation).
+     RGB triplets so the scripts can apply their own alpha. */
+  --sl-canvas-accent-rgb: 63, 169, 161;
+  --sl-canvas-deep-rgb: 44, 138, 131;
+  --sl-canvas-label-rgb: 18, 63, 59;
+  --sl-canvas-ring-rgb: 255, 255, 255;
+  --sl-hero-grad-1: #d6f0ec;
+  --sl-hero-grad-2: #bce3dd;
+}
+
+/* ------------------------------------------------------------
+   2b. Dark theme.
+   The inline script in BaseLayout.astro resolves the stored
+   choice (localStorage "sl-theme") or the system preference and
+   always sets an explicit data-theme, so this one attribute
+   block covers both cases. It overrides the @theme-generated
+   --color-* variables (so Tailwind utilities follow) and the
+   --sl-* mirrors. Without JS the site stays on the light theme.
+   ------------------------------------------------------------ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* @theme mirrors -> Tailwind utilities */
+  --color-sl-base: #0c1514;
+  --color-sl-surface: #121e1d;
+  --color-sl-surface-2: #182726;
+  --color-sl-accent: #5ec8c0;
+  --color-sl-accent-hover: #7ad4cc;
+  --color-sl-accent-soft: #14312e;
+  --color-sl-accent-ink: #8fdfd8;
+  --color-sl-header-base: #123a36;
+  --color-sl-header-deep: #0d2624;
+  --color-sl-header-text: #d9efec;
+  --color-sl-header-muted: #9dbfba;
+  --color-sl-text: #e4eeec;
+  --color-sl-text-secondary: #a5b8b6;
+  --color-sl-text-muted: #718583;
+  --color-sl-border: #223231;
+  --color-sl-border-accent: #2f544f;
+  --color-sl-success: #4cc084;
+  --color-sl-warning: #e0a452;
+  --color-sl-error: #e4736f;
+
+  /* plain custom-property mirrors */
+  --sl-bg-base: #0c1514;
+  --sl-bg-surface: #121e1d;
+  --sl-bg-surface-2: #182726;
+
+  --sl-border: #223231;
+  --sl-border-accent: #2f544f;
+
+  --sl-accent: #5ec8c0;
+  --sl-accent-hover: #7ad4cc;
+  --sl-accent-soft: #14312e;
+  --sl-accent-ink: #8fdfd8;
+
+  --sl-gradient-soft: linear-gradient(180deg, #121e1d 0%, #0c1514 100%);
+  --sl-gradient-text: linear-gradient(135deg, #7ad4cc 0%, #a9e7e1 100%);
+
+  --sl-header-text: #d9efec;
+  --sl-header-muted: #9dbfba;
+  --sl-gradient-header: linear-gradient(180deg, #123a36 0%, #0d2624 100%);
+
+  --sl-text-primary: #e4eeec;
+  --sl-text-secondary: #a5b8b6;
+  --sl-text-muted: #718583;
+
+  --sl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sl-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --sl-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+
+  --sl-canvas-accent-rgb: 94, 200, 192;
+  --sl-canvas-deep-rgb: 143, 223, 216;
+  --sl-canvas-label-rgb: 217, 239, 236;
+  --sl-canvas-ring-rgb: 12, 21, 20;
+  --sl-hero-grad-1: #123a36;
+  --sl-hero-grad-2: #0d2624;
 }
 
 /* ------------------------------------------------------------
@@ -240,6 +320,10 @@ h3 {
   color: #fff;
   transform: translateY(-2px);
   box-shadow: var(--sl-shadow-md);
+}
+/* dark accent-hover is a light teal; keep dark ink on it */
+:root[data-theme="dark"] .sl-btn-primary:hover {
+  color: #06302d;
 }
 .sl-btn-secondary {
   background: var(--sl-bg-surface);
@@ -372,6 +456,46 @@ h3 {
 .sl-nav .sl-btn {
   padding: 9px 20px;
   font-size: var(--sl-text-sm);
+}
+.sl-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sl-space-2);
+}
+
+/* Theme toggle (sun/moon button in the nav) */
+.sl-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--sl-radius-pill);
+  border: 1px solid transparent;
+  background: none;
+  color: var(--sl-accent-ink);
+  cursor: pointer;
+  transition:
+    background var(--sl-dur) var(--sl-ease),
+    border-color var(--sl-dur) var(--sl-ease);
+}
+.sl-theme-toggle:hover {
+  background: var(--sl-accent-soft);
+  border-color: var(--sl-border-accent);
+}
+.sl-theme-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+.sl-theme-toggle .sl-icon-sun {
+  display: none;
+}
+:root[data-theme="dark"] .sl-theme-toggle .sl-icon-sun {
+  display: block;
+}
+:root[data-theme="dark"] .sl-theme-toggle .sl-icon-moon {
+  display: none;
 }
 @media (max-width: 640px) {
   .sl-nav-links {
