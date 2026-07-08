@@ -103,8 +103,8 @@ const {
       // Fade the grid out toward the side/bottom edges so lines dissolve
       // into the backdrop instead of clipping hard at the canvas boundary
       // (the band behind uses the same gradient, so erasing blends clean).
-      const fadeX = Math.min(140, w * 0.12);
-      const fadeY = Math.min(110, h * 0.18);
+      const fadeX = w * 0.2;
+      const fadeY = h * 0.3;
       ctx.globalCompositeOperation = "destination-out";
       const fades: [number, number, number, number, number, number, number, number][] = [
         [0, 0, fadeX, 0, 0, 0, fadeX, h], // left
