@@ -171,8 +171,12 @@ const right = CARDS.filter((c) => c.side === "right");
       const action = mixer.clipAction(clip);
       action.setLoop(THREE.LoopPingPong, Infinity);
       action.play();
-      // Reduced motion: no flapping, hold a static wings-spread pose.
-      if (reduce) mixer.setTime(clip.duration);
+      if (reduce) {
+        // Reduced motion: no flapping, hold a static wings-spread pose.
+        mixer.setTime(clip.duration);
+      } else {
+        action.timeScale = 0.75; // flap at 3/4 of the authored speed
+      }
     }
 
     // Anchor points for the connector lines, in centered model units.
