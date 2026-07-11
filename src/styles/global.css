@@ -141,7 +141,7 @@
   --sl-dur: 0.15s;
   --sl-dur-reveal: 1.2s;
 
-  /* Canvas drawing colors (hero grid, globe, skills constellation).
+  /* Canvas drawing colors (hero grid, globe).
      RGB triplets so the scripts can apply their own alpha. */
   --sl-canvas-accent-rgb: 63, 169, 161;
   --sl-canvas-deep-rgb: 44, 138, 131;
@@ -149,6 +149,13 @@
   --sl-canvas-ring-rgb: 255, 255, 255;
   --sl-hero-grad-1: #d6f0ec;
   --sl-hero-grad-2: #bce3dd;
+
+  /* 3D model lighting (crow skills scene). RGB triplets read by the
+     Three.js script; --sl-model-env scales the environment reflections. */
+  --sl-model-key-rgb: 255, 252, 246;
+  --sl-model-fill-rgb: 190, 226, 221;
+  --sl-model-rim-rgb: 63, 169, 161;
+  --sl-model-env: 1;
 }
 
 /* ------------------------------------------------------------
@@ -218,6 +225,11 @@
   --sl-canvas-ring-rgb: 12, 21, 20;
   --sl-hero-grad-1: #123a36;
   --sl-hero-grad-2: #0d2624;
+
+  --sl-model-key-rgb: 214, 240, 236;
+  --sl-model-fill-rgb: 47, 84, 79;
+  --sl-model-rim-rgb: 122, 212, 204;
+  --sl-model-env: 1.6;
 }
 
 /* ------------------------------------------------------------
@@ -605,36 +617,169 @@ h3 {
   }
 }
 
-/* Skills constellation (rotating tech graph, sibling to the globe) */
-.sl-constellation {
+/* Crow skills scene: pinned 3D model scrubbed by scroll, skill cards on
+   both sides tied to the model with SVG connector lines. */
+.sl-crow-scene {
   position: relative;
-  width: 100%;
-  height: clamp(360px, 52vw, 520px);
+  height: 320vh;
   margin-top: var(--sl-space-8);
-  border-radius: var(--sl-radius-lg);
-  background: var(--sl-gradient-soft);
-  border: 1px solid var(--sl-border);
-  box-shadow: var(--sl-shadow-md);
-  overflow: hidden;
 }
-.sl-constellation-canvas {
+.sl-crow-sticky {
+  position: sticky;
+  top: calc(var(--sl-nav-height) + var(--sl-space-2));
+  height: calc(100vh - var(--sl-nav-height) - var(--sl-space-8));
+  min-height: 480px;
+}
+/* soft halo behind the model */
+.sl-crow-sticky::before {
+  content: "";
+  position: absolute;
+  inset: 14% 26%;
+  background: radial-gradient(closest-side, var(--sl-accent-soft) 0%, transparent 72%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.sl-crow-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  display: block;
   cursor: grab;
-  touch-action: none; /* let vertical drag tilt the cluster, not scroll */
+  touch-action: none; /* let vertical drag tilt the crow, not scroll */
 }
-.sl-constellation-canvas.is-dragging {
+.sl-crow-canvas.is-dragging {
   cursor: grabbing;
 }
-.sl-constellation-hint {
+.sl-crow-links {
   position: absolute;
-  left: var(--sl-space-6);
-  bottom: var(--sl-space-4);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+}
+.sl-crow-link {
+  opacity: 0;
+  transition: opacity 0.6s var(--sl-ease);
+}
+.sl-crow-link.is-on {
+  opacity: 1;
+}
+.sl-crow-link line {
+  stroke: var(--sl-border-accent);
+  stroke-width: 1.5;
+}
+.sl-crow-link circle {
+  fill: var(--sl-accent);
+}
+.sl-crow-col {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(300px, 26%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sl-space-6);
+  z-index: 2;
+}
+.sl-crow-col-left {
+  left: 0;
+}
+.sl-crow-col-right {
+  right: 0;
+}
+.sl-crow-card {
+  padding: var(--sl-space-4) var(--sl-space-6);
+}
+.sl-crow-card h3 {
+  font-size: var(--sl-text-base);
+  margin: 0 0 4px;
+}
+.sl-crow-card p {
+  margin: 0;
+  color: var(--sl-text-secondary);
+  font-size: var(--sl-text-sm);
+}
+/* hidden state only once the scene script took over the reveal */
+.sl-crow-ready .sl-crow-card {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.7s var(--sl-ease),
+    transform 0.7s var(--sl-ease);
+}
+.sl-crow-ready .sl-crow-card.is-on {
+  opacity: 1;
+  transform: none;
+}
+.sl-crow-hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: var(--sl-space-2);
   font-size: var(--sl-text-sm);
   color: var(--sl-text-muted);
   pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.4s var(--sl-ease);
+}
+.sl-crow-hint.is-hidden {
+  opacity: 0;
+}
+/* WebGL missing or model failed: plain static cards, no canvas */
+.sl-crow-fallback .sl-crow-canvas,
+.sl-crow-fallback .sl-crow-links,
+.sl-crow-fallback .sl-crow-hint,
+.sl-crow-fallback .sl-crow-sticky::before {
+  display: none;
+}
+.sl-crow-fallback {
+  height: auto;
+}
+.sl-crow-fallback .sl-crow-sticky {
+  position: static;
+  height: auto;
+  min-height: 0;
+}
+.sl-crow-fallback .sl-crow-col {
+  position: static;
+  transform: none;
+  width: 100%;
+  margin-bottom: var(--sl-space-6);
+}
+@media (max-width: 900px) {
+  .sl-crow-scene {
+    height: auto;
+  }
+  .sl-crow-sticky {
+    position: relative;
+    top: 0;
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sl-space-6);
+  }
+  .sl-crow-sticky::before {
+    display: none;
+  }
+  .sl-crow-canvas {
+    position: relative;
+    inset: auto;
+    height: min(90vw, 420px);
+    order: -1;
+  }
+  .sl-crow-links,
+  .sl-crow-hint {
+    display: none;
+  }
+  .sl-crow-col {
+    position: static;
+    transform: none;
+    width: 100%;
+  }
 }
 .sl-hero h1 {
   font-size: var(--sl-text-hero);
