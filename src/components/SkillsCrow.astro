@@ -249,8 +249,15 @@ const right = CARDS.filter((c) => c.side === "right");
     let lastY = 0;
     const clampTilt = (t: number) => Math.max(-TILT_MAX, Math.min(TILT_MAX, t));
 
-    const setRotation = (p: number) => {
-      rig.rotation.y = BASE_YAW + (reduce ? 0 : p * TURNS * Math.PI * 2) + dragYaw;
+    // The scroll-driven yaw eases toward its target instead of tracking it
+    // 1:1, so a nav-link jump that flies through the section swings the crow
+    // gently rather than whipping it through full turns. Drag stays direct.
+    let scrollYaw: number | null = null;
+    const setRotation = (p: number, dt: number) => {
+      const target = reduce ? 0 : p * TURNS * Math.PI * 2;
+      if (scrollYaw === null) scrollYaw = target;
+      scrollYaw += (target - scrollYaw) * (1 - Math.exp(-6 * dt));
+      rig.rotation.y = BASE_YAW + scrollYaw + dragYaw;
       rig.rotation.x = dragTilt;
     };
 
@@ -326,20 +333,25 @@ const right = CARDS.filter((c) => c.side === "right");
       return range > 0 ? Math.min(1, Math.max(0, -rect.top / range)) : 1;
     };
 
-    const frame = (p: number) => {
+    // dt defaults to Infinity so on-demand frames (resize, theme change,
+    // reduced motion) snap the eased yaw straight to its target.
+    const frame = (p: number, dt = Infinity) => {
       hint?.classList.toggle("is-hidden", reduce || p > 0.06);
-      setRotation(p);
+      setRotation(p, dt);
       renderer.render(scene, camera);
       updateLines(p);
     };
 
     // The flap always plays, so render on a rAF loop, but only while the
     // scene is on screen. Reduced motion renders single frames on demand.
-    const clock = new THREE.Clock();
+    let lastTime = 0;
     let raf = 0;
     const loop = () => {
       raf = requestAnimationFrame(loop);
-      mixer.update(Math.min(clock.getDelta(), 0.1));
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+      mixer.update(dt);
       if (!dragging) {
         dragYaw += velYaw;
         dragTilt = clampTilt(dragTilt + velTilt);
@@ -348,14 +360,14 @@ const right = CARDS.filter((c) => c.side === "right");
         if (Math.abs(velYaw) < 0.00005) velYaw = 0;
         if (Math.abs(velTilt) < 0.00005) velTilt = 0;
       }
-      frame(progress());
+      frame(progress(), dt);
     };
     const vis = new IntersectionObserver((entries) => {
       const seen = entries.some((e) => e.isIntersecting);
       if (reduce) {
         if (seen) frame(progress());
       } else if (seen && !raf) {
-        clock.getDelta(); // drop the time spent off screen
+        lastTime = performance.now(); // drop the time spent off screen
         loop();
       } else if (!seen && raf) {
         cancelAnimationFrame(raf);
