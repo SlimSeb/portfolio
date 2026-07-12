@@ -421,6 +421,25 @@ const right = SKILLS.slice(3);
       // Each side is split into 3 stacked segments (matching the 3 skill rows).
       // Each segment is a closed hollow band: outer arc, a cap across to the
       // inner arc, the inner arc back, then closePath caps the other end.
+
+      // a selected skill fills its matching segment with colour. Left side rows
+      // run bottom-to-top on the arc, so row r maps to segment (2 - r) there.
+      const onSeg = host.querySelector<HTMLElement>(".sl-crow-seg.is-on");
+      let selBase = -1;
+      let selI = -1;
+      if (onSeg) {
+        const row = parseInt(onSeg.dataset.row ?? "-1", 10);
+        if (row >= 0) {
+          if (onSeg.closest(".sl-crow-side-left")) {
+            selBase = Math.PI;
+            selI = 2 - row;
+          } else {
+            selBase = 0;
+            selI = row;
+          }
+        }
+      }
+
       ctx.lineWidth = 1;
       ctx.strokeStyle = `rgba(${accent},0.6)`;
       for (const base of [0, Math.PI]) {
@@ -438,6 +457,10 @@ const right = SKILLS.slice(3);
           ctx.arc(cx, cy, r, outerAt(ta), outerAt(tb), false);
           ctx.arc(cx, cy, rin, innerAt(tb), innerAt(ta), true);
           ctx.closePath();
+          if (base === selBase && i === selI) {
+            ctx.fillStyle = `rgba(${accent},0.9)`;
+            ctx.fill();
+          }
           ctx.stroke();
         }
       }
@@ -451,5 +474,16 @@ const right = SKILLS.slice(3);
       readTheme();
       draw();
     }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
+
+    // repaint when a skill is selected/deselected so its segment fills in
+    const segObserver = new MutationObserver(draw);
+    host
+      .querySelectorAll(".sl-crow-seg")
+      .forEach((el) =>
+        segObserver.observe(el, {
+          attributes: true,
+          attributeFilter: ["class"],
+        }),
+      );
   }
 </script>
