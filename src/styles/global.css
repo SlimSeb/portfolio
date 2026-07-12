@@ -286,30 +286,9 @@ h3 {
   font-weight: var(--sl-weight-black);
   margin: var(--sl-space-3) 0 var(--sl-space-8);
 }
-/* Tinted section. A run of adjacent tinted sections reads as one soft panel
-   that eases in from the page base, deepens to the tint, then eases back out
-   to the base — so it melts into the plain sections around it with no hard
-   seam. Colors come from theme tokens, so it adapts to dark mode. */
 .sl-section-tint {
-  /* run start: base → tint */
-  background: linear-gradient(180deg, var(--sl-bg-base) 0%, var(--sl-bg-surface-2) 100%);
-}
-/* continuation: hold the deep tint, no seam with the previous tinted section */
-.sl-section-tint + .sl-section-tint {
-  background: var(--sl-bg-surface-2);
-}
-/* run end: ease the tint back down to the page base */
-.sl-section-tint:not(:has(+ .sl-section-tint)) {
-  background: linear-gradient(180deg, var(--sl-bg-surface-2) 0%, var(--sl-bg-base) 100%);
-}
-/* lone tinted section: a self-contained swell in and out of the base */
-.sl-section-tint:not(.sl-section-tint + .sl-section-tint):not(:has(+ .sl-section-tint)) {
-  background: linear-gradient(
-    180deg,
-    var(--sl-bg-base) 0%,
-    var(--sl-bg-surface-2) 50%,
-    var(--sl-bg-base) 100%
-  );
+  background: var(--sl-gradient-soft);
+  border-block: 1px solid var(--sl-border);
 }
 
 /* ------------------------------------------------------------
