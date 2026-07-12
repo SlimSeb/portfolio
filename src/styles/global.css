@@ -628,6 +628,7 @@ h3 {
    interactive layout is gated behind .sl-crow-ready, added by the script. */
 .sl-crow-canvas,
 .sl-crow-side,
+.sl-crow-ring,
 .sl-crow-hint {
   display: none;
 }
@@ -656,12 +657,16 @@ h3 {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.6fr) auto minmax(0, 1fr);
+  /* Pin the single row to the stage height so the hidden reveal cards can't
+     grow it to their content height (which used to balloon the canvas and
+     labels far past the circle). */
+  grid-template-rows: minmax(0, 1fr);
   column-gap: var(--sl-space-3);
   align-items: stretch;
-  /* sized so the whole figure fits on screen below the section heading
-     (~300px of heading block + section padding above the stage) */
-  height: min(calc(100vh - var(--sl-nav-height) - 300px), 480px);
-  min-height: 320px;
+  /* Fixed, width-based height (like the other canvases) so the figure stays
+     compact and predictable regardless of viewport height, keeping the outer
+     labels on screen. */
+  height: clamp(340px, 42vw, 440px);
 }
 /* soft halo behind the model */
 .sl-crow-ready .sl-crow-stage::before {
@@ -681,6 +686,21 @@ h3 {
 }
 .sl-crow-canvas.is-dragging {
   cursor: grabbing;
+}
+/* the "( )" circle sits behind the model and labels */
+.sl-crow-ready .sl-crow-ring {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.sl-crow-ready .sl-crow-canvas,
+.sl-crow-ready .sl-crow-side {
+  position: relative;
+  z-index: 1;
 }
 /* Parenthesis selectors: three grid rows per side, one segment button per
    row. Each button is [label + arc piece]; the arc is border-only — a big
@@ -722,50 +742,22 @@ h3 {
 .sl-crow-ready .sl-crow-side-left .sl-crow-seg {
   justify-content: flex-end;
   text-align: right;
+  padding-right: 48px; /* keep the labels clear of the parenthesis arc */
 }
 .sl-crow-ready .sl-crow-side-right .sl-crow-seg {
   text-align: left;
+  padding-left: 48px;
 }
-/* the arc pieces */
-.sl-crow-ready .sl-crow-side-left .sl-crow-seg::after,
-.sl-crow-ready .sl-crow-side-right .sl-crow-seg::before {
-  content: "";
-  flex: none;
-  align-self: stretch;
-  width: 30px;
-  border: 0 solid var(--sl-border);
-  transition: border-color 0.3s var(--sl-ease);
+/* the middle row sits at the widest point of the arc, so nudge it further out
+   (transform, so the label keeps its width and doesn't wrap) */
+.sl-crow-ready .sl-crow-side-left .sl-crow-seg[data-row="1"] {
+  transform: translateX(-42px);
 }
-.sl-crow-ready .sl-crow-side-left .sl-crow-seg::after {
-  border-left-width: 10px;
+.sl-crow-ready .sl-crow-side-right .sl-crow-seg[data-row="1"] {
+  transform: translateX(42px);
 }
-.sl-crow-ready .sl-crow-side-left .sl-crow-seg[data-row="0"]::after {
-  border-top-width: 10px;
-  border-top-left-radius: 100% 100%;
-}
-.sl-crow-ready .sl-crow-side-left .sl-crow-seg[data-row="2"]::after {
-  border-bottom-width: 10px;
-  border-bottom-left-radius: 100% 100%;
-}
-.sl-crow-ready .sl-crow-side-right .sl-crow-seg::before {
-  border-right-width: 10px;
-}
-.sl-crow-ready .sl-crow-side-right .sl-crow-seg[data-row="0"]::before {
-  border-top-width: 10px;
-  border-top-right-radius: 100% 100%;
-}
-.sl-crow-ready .sl-crow-side-right .sl-crow-seg[data-row="2"]::before {
-  border-bottom-width: 10px;
-  border-bottom-right-radius: 100% 100%;
-}
-.sl-crow-ready .sl-crow-seg:hover::after,
-.sl-crow-ready .sl-crow-seg:hover::before {
-  border-color: var(--sl-border-accent);
-}
-.sl-crow-ready .sl-crow-seg.is-on::after,
-.sl-crow-ready .sl-crow-seg.is-on::before {
-  border-color: var(--sl-accent);
-}
+/* The parentheses are now a single hollow circle drawn around the model on
+   the #crowRing canvas (see SkillsCrow.astro); the segments are plain labels. */
 /* One card per segment row; only the selected one is visible. Tip rows hug
    the stage edge so a tall card never spills out of the stage. */
 .sl-crow-ready .sl-crow-cards {
@@ -784,6 +776,8 @@ h3 {
   align-self: end;
 }
 .sl-crow-ready .sl-crow-card {
+  position: relative;
+  z-index: 4; /* a revealed card stacks above the labels and the canvas */
   opacity: 0;
   visibility: hidden;
   transition:
@@ -821,7 +815,10 @@ h3 {
 }
 @media (max-width: 900px) {
   /* Narrow screens: canvas on top, the segments become a pill row (the
-     paren arcs go away), and the selected card drops in below. */
+     circle goes away), and the selected card drops in below. */
+  .sl-crow-ready .sl-crow-ring {
+    display: none;
+  }
   .sl-crow-ready .sl-crow-stage {
     display: flex;
     flex-wrap: wrap;
