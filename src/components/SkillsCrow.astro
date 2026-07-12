@@ -1,114 +1,120 @@
 ---
-// Skills scene: the Crow_Spread 3D model sits pinned in the center, wings
-// flapping on a continuous loop, while scrolling spins it around. Skill
-// cards fade in on both sides, each tied to a point on the model by an SVG
-// line that tracks the crow as it moves. Reduced-motion users get a static
-// spread pose with every card visible; if WebGL is unavailable the cards
-// render as a plain list.
-type CardDef = {
-  side: "left" | "right";
-  anchor: string;
-  at: number; // scroll progress (0..1) at which the card reveals
-  title: string;
-  body: string;
-};
+// Skills scene: the crow model sits centered between two parenthesis-shaped
+// selectors, like ( crow ). Each paren is drawn with thick CSS borders and
+// split into three clickable segments, one per skill; picking one reveals
+// its card (with a link) beside it and turns the crow toward it. Without JS
+// or WebGL the cards render as a plain stacked list.
+type Skill = { title: string; body: string; href: string; cta: string };
 
-const CARDS: CardDef[] = [
+const SKILLS: Skill[] = [
   {
-    side: "left",
-    anchor: "wingL",
-    at: 0.1,
     title: ".NET & C#",
     body: "My daily drivers: modern C#, ASP.NET, and the tooling around them.",
+    href: "/cv",
+    cta: "See my CV",
   },
   {
-    side: "right",
-    anchor: "head",
-    at: 0.22,
     title: "Software architecture",
     body: "Plugin systems, dependency injection, and designs that stay easy to change.",
+    href: "#about",
+    cta: "More about me",
   },
   {
-    side: "left",
-    anchor: "tail",
-    at: 0.34,
     title: "Data & observability",
     body: "EF Core for persistence, OpenTelemetry for seeing what actually happens.",
+    href: "https://github.com/SlimSeb",
+    cta: "My GitHub",
   },
   {
-    side: "right",
-    anchor: "wingR",
-    at: 0.46,
     title: "Performance",
     body: "Profiling, allocations, and the low-level details that make code fast.",
+    href: "/blog",
+    cta: "Read the blog",
   },
   {
-    side: "left",
-    anchor: "feet",
-    at: 0.58,
     title: "CI/CD",
     body: "Pipelines that build, test, and ship without ceremony.",
+    href: "https://www.nuget.org/profiles/Slimf",
+    cta: "Packages on NuGet",
   },
   {
-    side: "right",
-    anchor: "body",
-    at: 0.7,
     title: "Side projects",
     body: "Elsa-Mina, Simplex, and a few NuGet packages I maintain.",
+    href: "#work",
+    cta: "Selected work",
   },
 ];
 
-const left = CARDS.filter((c) => c.side === "left");
-const right = CARDS.filter((c) => c.side === "right");
+const left = SKILLS.slice(0, 3);
+const right = SKILLS.slice(3);
 ---
 
 <div class="sl-crow-scene" id="crowScene">
-  <div class="sl-crow-sticky" id="crowSticky">
+  <div class="sl-crow-stage">
+    <div class="sl-crow-cards sl-crow-cards-left">
+      {
+        left.map((s, r) => (
+          <article class="sl-card sl-crow-card" id={`crow-card-${r}`}>
+            <h3>{s.title}</h3>
+            <p>{s.body}</p>
+            <a class="sl-btn sl-btn-secondary" href={s.href}>
+              {s.cta}
+            </a>
+          </article>
+        ))
+      }
+    </div>
+    <div class="sl-crow-side sl-crow-side-left">
+      {
+        left.map((s, r) => (
+          <button type="button" class="sl-crow-seg" data-row={r} aria-expanded="false" aria-controls={`crow-card-${r}`}>
+            {s.title}
+          </button>
+        ))
+      }
+    </div>
     <canvas
       class="sl-crow-canvas"
       id="crowCanvas"
       role="img"
-      aria-label="3D model of a crow flapping its wings; scroll or drag to spin it around."
+      aria-label="3D model of a crow flapping its wings; pick a skill to make it turn toward the matching card, or drag to spin it."
     ></canvas>
-    <svg class="sl-crow-links" id="crowLinks" aria-hidden="true"></svg>
-    <div class="sl-crow-col sl-crow-col-left">
+    <div class="sl-crow-side sl-crow-side-right">
       {
-        left.map((c) => (
-          <article class="sl-card sl-crow-card" data-anchor={c.anchor} data-at={c.at} data-side="left">
-            <h3>{c.title}</h3>
-            <p>{c.body}</p>
+        right.map((s, r) => (
+          <button type="button" class="sl-crow-seg" data-row={r} aria-expanded="false" aria-controls={`crow-card-${r + 3}`}>
+            {s.title}
+          </button>
+        ))
+      }
+    </div>
+    <div class="sl-crow-cards sl-crow-cards-right">
+      {
+        right.map((s, r) => (
+          <article class="sl-card sl-crow-card" id={`crow-card-${r + 3}`}>
+            <h3>{s.title}</h3>
+            <p>{s.body}</p>
+            <a class="sl-btn sl-btn-secondary" href={s.href}>
+              {s.cta}
+            </a>
           </article>
         ))
       }
     </div>
-    <div class="sl-crow-col sl-crow-col-right">
-      {
-        right.map((c) => (
-          <article class="sl-card sl-crow-card" data-anchor={c.anchor} data-at={c.at} data-side="right">
-            <h3>{c.title}</h3>
-            <p>{c.body}</p>
-          </article>
-        ))
-      }
-    </div>
-    <span class="sl-crow-hint" id="crowHint" aria-hidden="true">keep scrolling · drag to spin</span>
+    <span class="sl-crow-hint" id="crowHint" aria-hidden="true">pick a skill · drag to spin</span>
   </div>
 </div>
 
 <script>
-  import type * as ThreeNS from "three";
-
   const MODEL_URL = "/models/crow-spread.glb";
   const BASE_YAW = -0.45; // resting three-quarter view
-  const TURNS = 1; // full rotations across the scroll range
+  const TILT_MAX = 0.6;
 
   const host = document.getElementById("crowScene");
-  const sticky = document.getElementById("crowSticky");
   const canvas = document.getElementById("crowCanvas") as HTMLCanvasElement | null;
-  const svg = document.getElementById("crowLinks");
   const hint = document.getElementById("crowHint");
 
-  async function init(host: HTMLElement, sticky: HTMLElement, canvas: HTMLCanvasElement, svg: SVGSVGElement) {
+  async function init(host: HTMLElement, canvas: HTMLCanvasElement) {
     // three.js is heavy, so it is code-split and only fetched once the
     // section is about to scroll into view.
     const [THREE, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
@@ -118,7 +124,6 @@ const right = CARDS.filter((c) => c.side === "right");
     ]);
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const narrow = window.matchMedia("(max-width: 900px)");
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -179,92 +184,82 @@ const right = CARDS.filter((c) => c.side === "right");
       }
     }
 
-    // Anchor points for the connector lines, in centered model units.
-    // The wingspan axis is whichever horizontal extent is larger, so the
-    // anchors survive a re-export with a different orientation.
-    const half = size.clone().multiplyScalar(0.5);
-    const v3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
-    const wingsAlongX = size.x >= size.z;
-    const anchors: Record<string, ThreeNS.Vector3> = wingsAlongX
-      ? {
-          wingL: v3(-half.x * 0.7, half.y * 0.2, 0),
-          wingR: v3(half.x * 0.7, half.y * 0.2, 0),
-          head: v3(0, half.y * 0.5, half.z * 0.45),
-          tail: v3(0, half.y * 0.05, -half.z * 0.7),
-          body: v3(0, 0, half.z * 0.25),
-          feet: v3(0, -half.y * 0.55, 0),
-        }
-      : {
-          wingL: v3(0, half.y * 0.2, -half.z * 0.7),
-          wingR: v3(0, half.y * 0.2, half.z * 0.7),
-          head: v3(half.x * 0.45, half.y * 0.5, 0),
-          tail: v3(-half.x * 0.7, half.y * 0.05, 0),
-          body: v3(half.x * 0.25, 0, 0),
-          feet: v3(0, -half.y * 0.55, 0),
-        };
+    // The head sits on whichever horizontal axis is not the wingspan, so the
+    // yaw that faces a given direction depends on the export orientation.
+    const yawOffset = size.x >= size.z ? 0 : -Math.PI / 2;
 
-    // One SVG line + endpoint dot per card.
-    const NS = "http://www.w3.org/2000/svg";
-    const items = [...host.querySelectorAll<HTMLElement>(".sl-crow-card")].map((card) => {
-      const g = document.createElementNS(NS, "g");
-      g.setAttribute("class", "sl-crow-link");
-      const line = document.createElementNS(NS, "line");
-      const dot = document.createElementNS(NS, "circle");
-      dot.setAttribute("r", "3.5");
-      g.append(line, dot);
-      svg.append(g);
-      return {
-        card,
-        g,
-        line,
-        dot,
-        col: card.parentElement as HTMLElement,
-        leftSide: card.dataset.side === "left",
-        at: parseFloat(card.dataset.at || "0"),
-        anchor: anchors[card.dataset.anchor || "body"] || anchors.body,
-      };
-    });
-
-    const fitCamera = () => {
-      const w = Math.max(1, canvas.clientWidth);
-      const h = Math.max(1, canvas.clientHeight);
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      // Fit the (normalized) model into the free band between the card
-      // columns on desktop, or most of the canvas on narrow screens.
-      const halfFov = THREE.MathUtils.degToRad(camera.fov) / 2;
-      const halfSize = 0.58;
-      const band = narrow.matches ? 0.85 : 0.52;
-      const dist = Math.max(halfSize / Math.tan(halfFov), halfSize / (Math.tan(halfFov) * camera.aspect * band));
-      camera.position.set(0, 0.1, dist);
-      camera.lookAt(0, 0, 0);
-      camera.updateProjectionMatrix();
-    };
-
-    // Drag to spin, same feel as the globe: 0.01 rad per px, inertia on
-    // release (applied in the render loop), vertical drag tilts with a clamp.
-    const TILT_MAX = 0.6;
-    let dragging = false;
-    let dragYaw = 0;
-    let dragTilt = 0;
+    // Rotation state: yaw/tilt ease toward their targets in the render loop.
+    // Dragging moves value and target together so the crow tracks the
+    // pointer 1:1; selecting a segment only moves the target, so the crow
+    // swings over smoothly.
+    let yaw = BASE_YAW;
+    let tilt = 0;
+    let targetYaw = BASE_YAW;
+    let targetTilt = 0;
     let velYaw = 0;
     let velTilt = 0;
+    let dragging = false;
     let lastX = 0;
     let lastY = 0;
     const clampTilt = (t: number) => Math.max(-TILT_MAX, Math.min(TILT_MAX, t));
 
-    // The scroll-driven yaw eases toward its target instead of tracking it
-    // 1:1, so a nav-link jump that flies through the section swings the crow
-    // gently rather than whipping it through full turns. Drag stays direct.
-    let scrollYaw: number | null = null;
-    const setRotation = (p: number, dt: number) => {
-      const target = reduce ? 0 : p * TURNS * Math.PI * 2;
-      if (scrollYaw === null) scrollYaw = target;
-      scrollYaw += (target - scrollYaw) * (1 - Math.exp(-6 * dt));
-      rig.rotation.y = BASE_YAW + scrollYaw + dragYaw;
-      rig.rotation.x = dragTilt;
+    // dt defaults to Infinity so on-demand frames (resize, theme change,
+    // reduced motion) snap the eased rotation straight to its target.
+    const frame = (dt = Infinity) => {
+      const k = 1 - Math.exp(-5 * dt);
+      yaw += (targetYaw - yaw) * k;
+      tilt += (targetTilt - tilt) * k;
+      rig.rotation.y = yaw;
+      rig.rotation.x = tilt;
+      renderer.render(scene, camera);
     };
 
+    // Where the crow looks when segment i is selected: a point out to that
+    // side, raised for the top row and lowered for the bottom one.
+    const facing = (i: number) => {
+      const side = i < 3 ? -1 : 1;
+      const row = i % 3;
+      const px = side * 1.15;
+      const py = 0.45 - row * 0.45;
+      const pz = 0.9;
+      return {
+        yaw: Math.atan2(px, pz) + yawOffset,
+        tilt: clampTilt(-Math.atan2(py, Math.hypot(px, pz))),
+      };
+    };
+
+    const segs = [...host.querySelectorAll<HTMLButtonElement>(".sl-crow-seg")];
+    const cards = [...host.querySelectorAll<HTMLElement>(".sl-crow-card")];
+    let selected = -1;
+
+    const select = (i: number) => {
+      selected = selected === i ? -1 : i; // click again to close
+      segs.forEach((b, j) => {
+        b.classList.toggle("is-on", j === selected);
+        b.setAttribute("aria-expanded", String(j === selected));
+      });
+      cards.forEach((c, j) => c.classList.toggle("is-on", j === selected));
+      hint?.classList.add("is-hidden");
+      const t = selected === -1 ? { yaw: BASE_YAW, tilt: 0 } : facing(selected);
+      targetYaw = t.yaw;
+      targetTilt = t.tilt;
+      velYaw = 0;
+      velTilt = 0;
+      // Unwind full turns left over from dragging so the crow takes the
+      // short way around instead of spinning back through them.
+      let d = (yaw - targetYaw) % (Math.PI * 2);
+      if (d > Math.PI) d -= Math.PI * 2;
+      if (d < -Math.PI) d += Math.PI * 2;
+      yaw = targetYaw + d;
+      if (reduce) frame(); // no loop running: snap to the new pose now
+    };
+    segs.forEach((b, i) => b.addEventListener("click", () => select(i)));
+    host.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && selected !== -1) select(selected);
+    });
+
+    // Drag to spin: 0.01 rad per px, inertia on release (applied in the
+    // render loop), vertical drag tilts with a clamp.
     canvas.addEventListener("pointerdown", (e) => {
       dragging = true;
       velYaw = 0;
@@ -280,11 +275,13 @@ const right = CARDS.filter((c) => c.side === "right");
       const dTilt = (e.clientY - lastY) * 0.01;
       lastX = e.clientX;
       lastY = e.clientY;
-      dragYaw += dYaw;
-      dragTilt = clampTilt(dragTilt + dTilt);
+      yaw += dYaw;
+      targetYaw += dYaw;
+      tilt = clampTilt(tilt + dTilt);
+      targetTilt = clampTilt(targetTilt + dTilt);
       velYaw = dYaw; // carried into inertia on release
       velTilt = dTilt;
-      if (reduce) frame(progress()); // no loop running: render the drag now
+      if (reduce) frame(); // no loop running: render the drag now
     });
     const endDrag = (e: PointerEvent) => {
       if (!dragging) return;
@@ -297,53 +294,19 @@ const right = CARDS.filter((c) => c.side === "right");
     canvas.addEventListener("pointerup", endDrag);
     canvas.addEventListener("pointercancel", endDrag);
 
-    const proj = new THREE.Vector3();
-    const updateLines = (p: number) => {
-      const mobile = narrow.matches;
-      const stickyRect = sticky.getBoundingClientRect();
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      for (const it of items) {
-        const on = reduce || p >= it.at;
-        it.card.classList.toggle("is-on", on);
-        it.g.classList.toggle("is-on", on && !mobile);
-        if (mobile) continue;
-        rig.localToWorld(proj.copy(it.anchor)).project(camera);
-        const ax = (proj.x * 0.5 + 0.5) * w;
-        const ay = (-proj.y * 0.5 + 0.5) * h;
-        // Card end from column rect + offsets so the card's own reveal
-        // transform never drags the line around.
-        const colRect = it.col.getBoundingClientRect();
-        const cy = colRect.top - stickyRect.top + it.card.offsetTop + it.card.offsetHeight / 2;
-        const cx = it.leftSide ? colRect.right - stickyRect.left + 6 : colRect.left - stickyRect.left - 6;
-        it.line.setAttribute("x1", String(cx));
-        it.line.setAttribute("y1", String(cy));
-        it.line.setAttribute("x2", String(ax));
-        it.line.setAttribute("y2", String(ay));
-        it.dot.setAttribute("cx", String(ax));
-        it.dot.setAttribute("cy", String(ay));
-      }
-    };
-
-    const progress = () => {
-      const rect = host.getBoundingClientRect();
-      const vh = window.innerHeight;
-      if (narrow.matches) {
-        // No pinning on narrow screens: progress = travel through viewport.
-        // Thresholds are compressed so the last cards do not lag offscreen.
-        return Math.min(1, Math.max(0, (vh - rect.top) / (vh + rect.height))) * 1.35;
-      }
-      const range = rect.height - sticky.offsetHeight;
-      return range > 0 ? Math.min(1, Math.max(0, -rect.top / range)) : 1;
-    };
-
-    // dt defaults to Infinity so on-demand frames (resize, theme change,
-    // reduced motion) snap the eased yaw straight to its target.
-    const frame = (p: number, dt = Infinity) => {
-      hint?.classList.toggle("is-hidden", reduce || p > 0.06);
-      setRotation(p, dt);
-      renderer.render(scene, camera);
-      updateLines(p);
+    const fitCamera = () => {
+      const w = Math.max(1, canvas.clientWidth);
+      const h = Math.max(1, canvas.clientHeight);
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      // Fit the (normalized) model into the canvas on both axes. Smaller =
+      // the crow fills more of the frame, so the stage reads less empty.
+      const halfFov = THREE.MathUtils.degToRad(camera.fov) / 2;
+      const halfSize = 0.42;
+      const dist = Math.max(halfSize / Math.tan(halfFov), halfSize / (Math.tan(halfFov) * camera.aspect * 0.95));
+      camera.position.set(0, 0.1, dist);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
     };
 
     // The flap always plays, so render on a rAF loop, but only while the
@@ -357,19 +320,21 @@ const right = CARDS.filter((c) => c.side === "right");
       lastTime = now;
       mixer.update(dt);
       if (!dragging) {
-        dragYaw += velYaw;
-        dragTilt = clampTilt(dragTilt + velTilt);
+        yaw += velYaw;
+        targetYaw += velYaw;
+        tilt = clampTilt(tilt + velTilt);
+        targetTilt = clampTilt(targetTilt + velTilt);
         velYaw *= 0.92; // inertia decay
         velTilt *= 0.92;
         if (Math.abs(velYaw) < 0.00005) velYaw = 0;
         if (Math.abs(velTilt) < 0.00005) velTilt = 0;
       }
-      frame(progress(), dt);
+      frame(dt);
     };
     const vis = new IntersectionObserver((entries) => {
       const seen = entries.some((e) => e.isIntersecting);
       if (reduce) {
-        if (seen) frame(progress());
+        if (seen) frame();
       } else if (seen && !raf) {
         lastTime = performance.now(); // drop the time spent off screen
         loop();
@@ -378,29 +343,28 @@ const right = CARDS.filter((c) => c.side === "right");
         raf = 0;
       }
     });
-    vis.observe(sticky);
+    vis.observe(canvas);
 
     new ResizeObserver(() => {
       fitCamera();
-      if (!raf) frame(progress());
+      if (!raf) frame();
     }).observe(canvas);
     new MutationObserver(() => {
       readTheme();
-      if (!raf) frame(progress());
+      if (!raf) frame();
     }).observe(document.documentElement, { attributeFilter: ["data-theme"] });
 
     fitCamera();
-    frame(progress());
+    frame();
   }
 
-  if (host && sticky && canvas && svg) {
+  if (host && canvas) {
     const boot = () => {
       host.classList.add("sl-crow-ready");
-      init(host, sticky, canvas, svg as unknown as SVGSVGElement).catch((err) => {
-        // No WebGL or the model failed to load: show the cards as a plain grid.
+      init(host, canvas).catch((err) => {
+        // No WebGL or the model failed to load: back to the static card list.
         console.error("crow scene failed, falling back to static cards", err);
         host.classList.remove("sl-crow-ready");
-        host.classList.add("sl-crow-fallback");
       });
     };
     const io = new IntersectionObserver(
