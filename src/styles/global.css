@@ -626,8 +626,8 @@ h3 {
 
 /* Crow skills scene: the model sits centered between two parenthesis-shaped
    selectors, like ( crow ). Each paren is drawn with thick borders and split
-   into three clickable segments; picking one reveals its card and turns the
-   crow toward it. */
+   into three clickable segments; picking one fills the full-width card below
+   the stage and turns the crow toward it. */
 .sl-crow-scene {
   margin-top: var(--sl-space-8);
 }
@@ -659,14 +659,15 @@ h3 {
 .sl-crow-card .sl-btn {
   margin-top: var(--sl-space-4);
 }
-/* Interactive stage: cards | ( | crow | ) | cards */
+/* Interactive stage: spacer | ( | crow | ) | spacer. The detail card lives
+   below the stage, but the outer 1fr columns stay as empty spacers so the
+   label and arc geometry is unchanged. */
 .sl-crow-ready .sl-crow-stage {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.6fr) auto minmax(0, 1fr);
-  /* Pin the single row to the stage height so the hidden reveal cards can't
-     grow it to their content height (which used to balloon the canvas and
-     labels far past the circle). */
+  /* Single pinned row so the stage height comes from the height rule below,
+     not from its contents. */
   grid-template-rows: minmax(0, 1fr);
   column-gap: var(--sl-space-3);
   align-items: stretch;
@@ -686,6 +687,7 @@ h3 {
 }
 .sl-crow-ready .sl-crow-canvas {
   display: block;
+  grid-column: 3;
   width: 100%;
   height: 100%;
   cursor: grab;
@@ -717,6 +719,12 @@ h3 {
   grid-template-rows: repeat(3, minmax(0, 1fr));
   row-gap: var(--sl-space-3);
   width: clamp(150px, 17vw, 210px);
+}
+.sl-crow-ready .sl-crow-side-left {
+  grid-column: 2;
+}
+.sl-crow-ready .sl-crow-side-right {
+  grid-column: 4;
 }
 .sl-crow-seg {
   background: none;
@@ -765,38 +773,23 @@ h3 {
 }
 /* The parentheses are now a single hollow circle drawn around the model on
    the #crowRing canvas (see SkillsCrow.astro); the segments are plain labels. */
-/* One card per segment row; only the selected one is visible. Tip rows hug
-   the stage edge so a tall card never spills out of the stage. */
+/* Single full-width detail slot below the stage: every card shares the same
+   grid cell, so the slot holds the height of the tallest card (no layout
+   shift) and the selected one fades in over it. */
 .sl-crow-ready .sl-crow-cards {
-  grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 0;
-  margin: 0;
+  margin: var(--sl-space-4) 0 0;
   min-width: 0;
 }
-.sl-crow-ready .sl-crow-card:nth-child(1) {
-  align-self: start;
-}
-.sl-crow-ready .sl-crow-card:nth-child(2) {
-  align-self: center;
-}
-.sl-crow-ready .sl-crow-card:nth-child(3) {
-  align-self: end;
-}
 .sl-crow-ready .sl-crow-card {
-  position: relative;
-  z-index: 4; /* a revealed card stacks above the labels and the canvas */
+  grid-area: 1 / 1;
   opacity: 0;
   visibility: hidden;
+  transform: translateY(8px);
   transition:
     opacity 0.5s var(--sl-ease),
     transform 0.5s var(--sl-ease),
     visibility 0s linear 0.5s;
-}
-.sl-crow-ready .sl-crow-cards-left .sl-crow-card {
-  transform: translateX(16px);
-}
-.sl-crow-ready .sl-crow-cards-right .sl-crow-card {
-  transform: translateX(-16px);
 }
 .sl-crow-ready .sl-crow-card.is-on {
   opacity: 1;
@@ -859,20 +852,6 @@ h3 {
   .sl-crow-ready .sl-crow-seg.is-on {
     border-color: var(--sl-border-accent);
     background: var(--sl-accent-soft);
-  }
-  .sl-crow-ready .sl-crow-cards {
-    display: block;
-    flex: 1 1 100%;
-    order: 1;
-    margin: 0;
-  }
-  .sl-crow-ready .sl-crow-card {
-    display: none;
-    transform: none;
-  }
-  .sl-crow-ready .sl-crow-card.is-on {
-    display: block;
-    margin-top: var(--sl-space-2);
   }
   .sl-crow-ready .sl-crow-hint {
     display: none;

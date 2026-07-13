@@ -1,9 +1,9 @@
 ---
 // Skills scene: the crow model sits centered between two parenthesis-shaped
 // selectors, like ( crow ). Each paren is drawn with thick CSS borders and
-// split into three clickable segments, one per skill; picking one reveals
-// its card (with a link) beside it and turns the crow toward it. Without JS
-// or WebGL the cards render as a plain stacked list.
+// split into three clickable segments, one per skill; picking one fills the
+// single full-width card below the stage and turns the crow toward the
+// segment. Without JS or WebGL the cards render as a plain stacked list.
 type Skill = { title: string; body: string; href: string; cta: string };
 
 const SKILLS: Skill[] = [
@@ -52,16 +52,6 @@ const right = SKILLS.slice(3);
 <div class="sl-crow-scene" id="crowScene">
   <div class="sl-crow-stage">
     <canvas class="sl-crow-ring" id="crowRing" aria-hidden="true"></canvas>
-    <div class="sl-crow-cards sl-crow-cards-left">
-      {
-        left.map((s, r) => (
-          <article class="sl-card sl-crow-card" id={`crow-card-${r}`}>
-            <h3>{s.title}</h3>
-            <p>{s.body}</p>
-          </article>
-        ))
-      }
-    </div>
     <div class="sl-crow-side sl-crow-side-left">
       {
         left.map((s, r) => (
@@ -75,7 +65,7 @@ const right = SKILLS.slice(3);
       class="sl-crow-canvas"
       id="crowCanvas"
       role="img"
-      aria-label="3D model of a crow flapping its wings; pick a skill to make it turn toward the matching card, or drag to spin it."
+      aria-label="3D model of a crow flapping its wings; pick a skill to show its details below and make the crow turn toward it, or drag to spin it."
     ></canvas>
     <div class="sl-crow-side sl-crow-side-right">
       {
@@ -86,17 +76,17 @@ const right = SKILLS.slice(3);
         ))
       }
     </div>
-    <div class="sl-crow-cards sl-crow-cards-right">
-      {
-        right.map((s, r) => (
-          <article class="sl-card sl-crow-card" id={`crow-card-${r + 3}`}>
-            <h3>{s.title}</h3>
-            <p>{s.body}</p>
-          </article>
-        ))
-      }
-    </div>
     <span class="sl-crow-hint" id="crowHint" aria-hidden="true">pick a skill · drag to spin</span>
+  </div>
+  <div class="sl-crow-cards">
+    {
+      SKILLS.map((s, i) => (
+        <article class="sl-card sl-crow-card" id={`crow-card-${i}`}>
+          <h3>{s.title}</h3>
+          <p>{s.body}</p>
+        </article>
+      ))
+    }
   </div>
 </div>
 
@@ -412,6 +402,9 @@ const right = SKILLS.slice(3);
         cy = h / 2;
       const r = Math.min(w, h) * 0.46; // outer radius, frames the model
       const rin = r - THICK; // inner radius of each parenthesis band
+      // Pre-boot the stage is empty and 0-tall, which would make the radii
+      // negative and ctx.arc throw; skip until the ready layout gives it size.
+      if (rin <= 0) return;
       const capX = OPENING * r; // horizontal half-opening, in px
       const dO = Math.asin(Math.min(1, capX / r)); // outer gap half-angle
       const dI = Math.asin(Math.min(1, capX / rin)); // inner gap half-angle
