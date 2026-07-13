@@ -288,7 +288,9 @@ h3 {
 }
 /* Tinted section: eases in from the page base to the tint and back out, so it
    blends into the plain sections above and below with the same soft transition
-   on every edge. Colors come from theme tokens, so it adapts to dark mode. */
+   on every edge. The hairline borders sit where the gradient matches the page
+   base, so they read as section separators rather than band edges. Colors come
+   from theme tokens, so it adapts to dark mode. */
 .sl-section-tint {
   background: linear-gradient(
     180deg,
@@ -296,6 +298,12 @@ h3 {
     var(--sl-bg-surface-2) 50%,
     var(--sl-bg-base) 100%
   );
+  border-block-start: 1px solid var(--sl-border);
+}
+/* Plain-section separator: the same hairline the tinted sections carry, for
+   full-bleed use put it on a full-width wrapper, not on the container. */
+.sl-section-sep {
+  border-block-start: 1px solid var(--sl-border);
 }
 
 /* ------------------------------------------------------------
