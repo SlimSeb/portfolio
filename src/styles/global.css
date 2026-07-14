@@ -851,11 +851,18 @@ h3 {
   .sl-crow-ready .sl-crow-side-right .sl-crow-seg::before {
     content: none;
   }
-  .sl-crow-ready .sl-crow-seg {
+  /* Selector matches the desktop side rules' specificity so their
+     arc-clearance padding and middle-row nudge don't leak into the pills. */
+  .sl-crow-ready .sl-crow-side .sl-crow-seg {
+    justify-content: center;
+    text-align: center;
     padding: 8px 14px;
     border: 1px solid var(--sl-border);
     border-radius: var(--sl-radius-pill);
     background: var(--sl-surface);
+  }
+  .sl-crow-ready .sl-crow-side .sl-crow-seg[data-row="1"] {
+    transform: none;
   }
   .sl-crow-ready .sl-crow-seg.is-on {
     border-color: var(--sl-border-accent);
@@ -863,6 +870,20 @@ h3 {
   }
   .sl-crow-ready .sl-crow-hint {
     display: none;
+  }
+}
+@media (max-width: 640px) {
+  /* Phone: the pill row wraps unevenly at this width, so lay the six skills
+     out as a two-column grid under the canvas instead. The sides stay
+     display: contents, so the segments auto-place into the grid, and the
+     canvas keeps its order: -1 to come first. */
+  .sl-crow-ready .sl-crow-stage {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  .sl-crow-ready .sl-crow-canvas {
+    grid-column: 1 / -1;
   }
 }
 .sl-hero h1 {
