@@ -300,11 +300,6 @@ h3 {
   );
   border-block-start: 1px solid var(--sl-border);
 }
-/* Plain-section separator: the same hairline the tinted sections carry, for
-   full-bleed use put it on a full-width wrapper, not on the container. */
-.sl-section-sep {
-  border-block-start: 1px solid var(--sl-border);
-}
 
 /* ------------------------------------------------------------
    5. Text accent (subtle single-hue teal gradient)
